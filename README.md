@@ -142,7 +142,9 @@ Atualmente o projeto encontra-se em fase de **desenvolvimento e definição conc
 
 ---
 
-# 👨‍💻 Autor
+# 👨‍💻 Autores
 
 **Leonardo Tosin**
+**João Paulo Vasconcelos**
+**William Wendling Veiga**
 Curso de Sistemas para Internet
