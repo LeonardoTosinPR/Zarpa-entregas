@@ -1,0 +1,29 @@
+body {
+  margin-top: 60px;
+}
+
+#main-content {
+  padding-top: 5px;
+  margin-left: 250px;
+}
+
+nav.navbar {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  background-color: white;
+}
+
+.sidebar {
+  width: 250px;
+  position: fixed;
+  top: 55px;
+  bottom: 0;
+  left: 0;
+  z-index: 100;
+  padding: 0;
+  border-right: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.avatar {
+  width: 315px;
+  height: 315px;
+}

@@ -1,0 +1,18 @@
+<h5 class="text-center mb-4">Entrar</h5>
+
+<form action="<?= route('users.authenticate') ?>" method="POST">
+    <div class="mb-3">
+        <label class="form-label">E-mail</label>
+        <input type="email" name="user[email]" class="form-control" placeholder="seu@email.com" required autofocus>
+    </div>
+    <div class="mb-4">
+        <label class="form-label">Senha</label>
+        <input type="password" name="user[password]" class="form-control" placeholder="••••••••" required>
+    </div>
+    <div class="d-grid mb-3">
+        <button type="submit" class="btn btn-warning fw-bold">Entrar</button>
+    </div>
+    <p class="text-center text-muted small mb-0">
+        Não tem conta? <a href="<?= route('users.register') ?>">Cadastre-se</a>
+    </p>
+</form>

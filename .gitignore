@@ -1,0 +1,10 @@
+/vendor/
+/.cache/
+.env
+
+*.log
+*.swp
+.DS_Store
+
+/public/assets/uploads/*
+!/public/assets/uploads/.gitkeep
