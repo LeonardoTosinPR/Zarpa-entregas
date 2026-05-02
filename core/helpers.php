@@ -11,6 +11,11 @@ if (!function_exists('dd')) {
 }
 
 if (!function_exists('route')) {
+    /**
+     * @param string $name
+     * @param mixed[] $params
+     * @return string
+     */
     function route(string $name, $params = []): string
     {
         return Router::getInstance()->getRoutePathByName($name, $params);

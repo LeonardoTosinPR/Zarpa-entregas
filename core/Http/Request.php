@@ -6,7 +6,11 @@ class Request
 {
     private string $method;
     private string $uri;
+
+    /** @var mixed[] */
     private array $params;
+
+    /** @var array<string, string> */
     private array $headers;
 
     public function __construct()
@@ -27,16 +31,19 @@ class Request
         return $this->uri;
     }
 
+    /** @return mixed[] */
     public function getParams(): array
     {
         return $this->params;
     }
 
+    /** @return array<string, string>*/
     public function getHeaders(): array
     {
         return $this->headers;
     }
 
+    /** @param mixed[] $params*/
     public function addParams(array $params): void
     {
         $this->params = array_merge($this->params, $params);
