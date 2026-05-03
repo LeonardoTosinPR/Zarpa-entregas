@@ -1,0 +1,69 @@
+<?php
+$isDeliverer = $this->current_user->isDeliverer();
+$heroText = $isDeliverer
+    ? 'Seu acesso esta pronto para receber corridas, acompanhar rotas e organizar entregas na mobilete.'
+    : 'Seu acesso esta pronto para criar pedidos, acompanhar coletas e enviar itens pela cidade.';
+$primaryMetric = $isDeliverer ? 'Corridas disponiveis' : 'Pedidos enviados';
+$secondaryMetric = $isDeliverer ? 'Rotas aceitas' : 'Coletas agendadas';
+$thirdMetric = $isDeliverer ? 'Ganhos estimados' : 'Economia estimada';
+$profileIcon = $isDeliverer ? 'bi-scooter' : 'bi-box-seam';
+?>
+
+<section class="delivery-hero mb-3">
+    <div class="delivery-hero-content">
+        <span class="status-chip mb-3">
+            <i class="bi <?= $profileIcon ?>"></i> <?= $this->current_user->userTypeLabel() ?>
+        </span>
+        <h1 class="fw-bold mb-2">Ola, <?= htmlspecialchars($this->current_user->name) ?>.</h1>
+        <p class="mb-0"><?= $heroText ?></p>
+    </div>
+    <img class="delivery-hero-mobilete" src="/assets/images/mobilete.svg" alt="Mobilete em rota">
+</section>
+
+<section class="metric-grid mb-3">
+    <div class="metric-tile">
+        <span><?= $primaryMetric ?></span>
+        <strong>0</strong>
+    </div>
+    <div class="metric-tile">
+        <span><?= $secondaryMetric ?></span>
+        <strong>0</strong>
+    </div>
+    <div class="metric-tile">
+        <span><?= $thirdMetric ?></span>
+        <strong>R$ 0</strong>
+    </div>
+</section>
+
+<section class="profile-panel">
+    <div class="d-flex align-items-center justify-content-between mb-3">
+        <h2 class="h5 mb-0">Seu perfil</h2>
+        <i class="bi <?= $profileIcon ?> fs-4 text-success"></i>
+    </div>
+    <div class="row g-3">
+        <div class="col-12 col-sm-6">
+            <div class="profile-label">Nome</div>
+            <div class="fw-semibold"><?= htmlspecialchars($this->current_user->name) ?></div>
+        </div>
+        <div class="col-12 col-sm-6">
+            <div class="profile-label">E-mail</div>
+            <div class="fw-semibold text-break"><?= htmlspecialchars($this->current_user->email) ?></div>
+        </div>
+        <?php if ($this->current_user->birth_date) : ?>
+        <div class="col-12 col-sm-6">
+            <div class="profile-label">Nascimento</div>
+            <div class="fw-semibold"><?= date('d/m/Y', strtotime($this->current_user->birth_date)) ?></div>
+        </div>
+        <?php endif; ?>
+        <div class="col-12 col-sm-6">
+            <div class="profile-label">Tipo de usuario</div>
+            <div class="fw-semibold"><?= $this->current_user->userTypeLabel() ?></div>
+        </div>
+        <?php if ($this->current_user->isAdmin()) : ?>
+        <div class="col-12 col-sm-6">
+            <div class="profile-label">Permissao</div>
+            <div class="fw-semibold">Administrador</div>
+        </div>
+        <?php endif; ?>
+    </div>
+</section>

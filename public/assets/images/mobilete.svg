@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 140" role="img" aria-labelledby="title desc">
+  <title id="title">Mobilete Zarpa</title>
+  <desc id="desc">Ilustracao simples de uma mobilete para entregas urbanas.</desc>
+  <defs>
+    <linearGradient id="body" x1="38" x2="168" y1="45" y2="96" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFC247"/>
+      <stop offset="1" stop-color="#EF5B4D"/>
+    </linearGradient>
+  </defs>
+  <path fill="#2FB7A3" d="M146 36h25c10 0 18 8 18 18v14h-47V40c0-2 2-4 4-4Z"/>
+  <path fill="#16181C" d="M155 28h25c4 0 7 3 7 7v8h-8v-7h-24v-8Z"/>
+  <path fill="#FFFDF8" d="M154 45h24c3 0 6 3 6 6v9h-30V45Z" opacity=".88"/>
+  <path fill="url(#body)" d="M68 60h67c17 0 31 14 31 31v5H85c-20 0-36-16-36-36h19Z"/>
+  <path fill="#FFC247" d="M43 50h35c6 0 11 5 11 11v6H46c-9 0-16-7-16-16v-1h13Z"/>
+  <path fill="#16181C" d="M87 50h32c4 0 8 4 8 8v2H83v-6c0-2 2-4 4-4Z"/>
+  <path fill="#2FB7A3" d="M124 68h42c13 0 24 11 24 24v3h-26c-4-14-17-24-32-24h-8v-3Z"/>
+  <path fill="#16181C" d="M151 50h32v8h-32zM184 54h18v8h-18z"/>
+  <circle cx="65" cy="97" r="27" fill="#16181C"/>
+  <circle cx="65" cy="97" r="14" fill="#FFFDF8"/>
+  <circle cx="65" cy="97" r="6" fill="#2FB7A3"/>
+  <circle cx="159" cy="97" r="27" fill="#16181C"/>
+  <circle cx="159" cy="97" r="14" fill="#FFFDF8"/>
+  <circle cx="159" cy="97" r="6" fill="#EF5B4D"/>
+  <path fill="#16181C" d="M28 67h31v8H28z"/>
+  <path fill="#FFFDF8" d="M92 73h19v9H92z" opacity=".6"/>
+  <path fill="#FFC247" d="M186 63h14c4 0 7 3 7 7v3h-21V63Z"/>
+</svg>

@@ -1,0 +1,74 @@
+<h2 class="h5 text-center mb-3">Criar conta</h2>
+
+<form action="<?= route('users.create') ?>" method="POST" data-validate-form novalidate>
+    <div class="mb-3">
+        <label class="form-label" for="register-name">Nome</label>
+        <input id="register-name" type="text" name="user[name]"
+               class="form-control <?= $user->errors('name') ? 'is-invalid' : '' ?>"
+               value="<?= htmlspecialchars($user->name ?? '') ?>"
+               autocomplete="name" minlength="3" required autofocus>
+        <div class="invalid-feedback"><?= htmlspecialchars($user->errors('name') ?? 'Informe seu nome completo.') ?></div>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label" for="register-email">E-mail</label>
+        <input id="register-email" type="email" name="user[email]"
+               class="form-control <?= $user->errors('email') ? 'is-invalid' : '' ?>"
+               value="<?= htmlspecialchars($user->email ?? '') ?>"
+               autocomplete="email" required>
+        <div class="invalid-feedback"><?= htmlspecialchars($user->errors('email') ?? 'Informe um e-mail valido.') ?></div>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">CPF</label>
+        <input type="text" name="user[cpf]"
+               class="form-control <?= $user->errors('cpf') ? 'is-invalid' : '' ?>"
+               value="<?= htmlspecialchars($user->cpf ?? '') ?>"
+               placeholder="000.000.000-00" maxlength="14" required>
+        <?php if ($user->errors('cpf')) : ?>
+            <div class="invalid-feedback"><?= $user->errors('cpf') ?></div>
+        <?php endif; ?>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label" for="register-birth-date">Data de nascimento</label>
+        <input id="register-birth-date" type="date" name="user[birth_date]" class="form-control <?= $user->errors('birth_date') ? 'is-invalid' : '' ?>"
+               value="<?= htmlspecialchars($user->birth_date ?? '') ?>">
+        <div class="invalid-feedback"><?= htmlspecialchars($user->errors('birth_date') ?? 'A data nao pode ser futura.') ?></div>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label" for="register-user-type">Como voce vai usar o Zarpa?</label>
+        <select id="register-user-type" name="user[user_type]" class="form-select <?= $user->errors('user_type') ? 'is-invalid' : '' ?>" required>
+            <option value="client" <?= ($user->user_type ?? 'client') === 'client' ? 'selected' : '' ?>>Cliente - quero enviar itens</option>
+            <option value="deliverer" <?= ($user->user_type ?? '') === 'deliverer' ? 'selected' : '' ?>>Entregador - quero fazer entregas</option>
+        </select>
+        <div class="invalid-feedback"><?= htmlspecialchars($user->errors('user_type') ?? 'Escolha um perfil valido.') ?></div>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label" for="register-password">Senha</label>
+        <input id="register-password" type="password" name="user[password]"
+               class="form-control <?= $user->errors('password') ? 'is-invalid' : '' ?>"
+               autocomplete="new-password" minlength="6" required data-password>
+        <div class="password-meter" data-password-meter aria-hidden="true"><span></span><span></span><span></span></div>
+        <div class="form-hint">Use pelo menos 6 caracteres.</div>
+        <div class="invalid-feedback"><?= htmlspecialchars($user->errors('password') ?? 'Informe uma senha valida.') ?></div>
+    </div>
+
+    <div class="mb-4">
+        <label class="form-label" for="register-password-confirmation">Confirmar senha</label>
+        <input id="register-password-confirmation" type="password" name="user[password_confirmation]" class="form-control" autocomplete="new-password" minlength="6" required data-password-confirmation>
+        <div class="invalid-feedback">As senhas precisam ser iguais.</div>
+    </div>
+
+    <div class="d-grid mb-3">
+        <button type="submit" class="btn btn-zarpa fw-bold">
+            <i class="bi bi-person-plus me-1"></i> Cadastrar
+        </button>
+    </div>
+
+    <p class="text-center text-muted small mb-0">
+        Ja tem conta? <a href="<?= route('users.login') ?>">Entrar</a>
+    </p>
+</form>

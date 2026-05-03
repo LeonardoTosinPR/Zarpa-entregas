@@ -1,0 +1,24 @@
+<h2 class="h5 text-center mb-3">Entrar</h2>
+
+<form action="<?= route('users.authenticate') ?>" method="POST" data-validate-form novalidate>
+    <div class="mb-3">
+        <label class="form-label">E-mail ou CPF</label>
+        <input type="text" name="user[identifier]" class="form-control" placeholder="seu@email.com ou 000.000.000-00" required autofocus>
+    </div>
+
+    <div class="mb-4">
+        <label class="form-label" for="login-password">Senha</label>
+        <input id="login-password" type="password" name="user[password]" class="form-control" placeholder="Sua senha" autocomplete="current-password" minlength="6" required>
+        <div class="invalid-feedback">Informe sua senha.</div>
+    </div>
+
+    <div class="d-grid mb-3">
+        <button type="submit" class="btn btn-zarpa fw-bold">
+            <i class="bi bi-box-arrow-in-right me-1"></i> Entrar
+        </button>
+    </div>
+
+    <p class="text-center text-muted small mb-0">
+        Nao tem conta? <a href="<?= route('users.register') ?>">Cadastre-se</a>
+    </p>
+</form>
