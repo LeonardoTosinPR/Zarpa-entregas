@@ -25,7 +25,7 @@ class AuthenticationsController extends Controller
         if ($user && $user->authenticate($params['password'])) {
             Auth::login($user);
             FlashMessage::success('Bem-vindo(a), ' . $user->name . '!');
-            $this->redirectTo(route('home'));
+            $this->redirectTo($user->isAdmin() ? route('admin.dashboard') : route('home'));
         } else {
             FlashMessage::danger('E-mail e/ou senha inválidos.');
             $this->redirectTo(route('users.login'));
@@ -41,6 +41,8 @@ class AuthenticationsController extends Controller
     public function create(Request $request): void
     {
         $params = $request->getParam('user');
+        unset($params['is_admin']);
+
         $user = new User($params);
 
         if ($user->save()) {

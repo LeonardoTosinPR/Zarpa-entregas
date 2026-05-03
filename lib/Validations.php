@@ -9,7 +9,53 @@ class Validations
     public static function notEmpty($attribute, $obj)
     {
         if ($obj->$attribute === null || $obj->$attribute === '') {
-            $obj->addError($attribute, 'não pode ser vazio!');
+            $obj->addError($attribute, 'nao pode ser vazio');
+            return false;
+        }
+
+        return true;
+    }
+
+    public static function email($attribute, $obj)
+    {
+        if ($obj->$attribute !== null && $obj->$attribute !== '' && !filter_var($obj->$attribute, FILTER_VALIDATE_EMAIL)) {
+            $obj->addError($attribute, 'deve ser um e-mail valido');
+            return false;
+        }
+
+        return true;
+    }
+
+    public static function minLength($attribute, $obj, int $length)
+    {
+        if ($obj->$attribute !== null && $obj->$attribute !== '' && strlen($obj->$attribute) < $length) {
+            $obj->addError($attribute, "deve ter pelo menos {$length} caracteres");
+            return false;
+        }
+
+        return true;
+    }
+
+    public static function notFutureDate($attribute, $obj)
+    {
+        if ($obj->$attribute === null || $obj->$attribute === '') {
+            return true;
+        }
+
+        $date = strtotime($obj->$attribute);
+
+        if ($date === false || $date > strtotime('today')) {
+            $obj->addError($attribute, 'nao pode ser uma data futura');
+            return false;
+        }
+
+        return true;
+    }
+
+    public static function inclusion($attribute, $obj, array $allowedValues)
+    {
+        if (!in_array($obj->$attribute, $allowedValues, true)) {
+            $obj->addError($attribute, 'possui uma opcao invalida');
             return false;
         }
 
@@ -19,7 +65,7 @@ class Validations
     public static function passwordConfirmation($obj)
     {
         if ($obj->password !== $obj->password_confirmation) {
-            $obj->addError('password', 'as senhas devem ser idênticas!');
+            $obj->addError('password', 'as senhas devem ser iguais');
             return false;
         }
 
@@ -70,7 +116,7 @@ class Validations
 
         if ($stmt->rowCount() !== 0) {
             foreach ($fields as $field) {
-                $object->addError($field, 'já existe um registro com esse dado');
+                $object->addError($field, 'ja existe um registro com esse dado');
             }
             return false;
         }
