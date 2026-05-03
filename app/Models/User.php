@@ -102,6 +102,10 @@ class User extends Model
             $value = null;
         }
 
+        if ($property === 'cpf' && $value !== null && $value !== '') {
+            $value = preg_replace('/\D/', '', $value);
+        }
+
         parent::__set($property, $value);
 
         if ($property === 'password' && $this->newRecord() && $value !== null && $value !== '') {
