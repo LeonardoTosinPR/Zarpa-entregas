@@ -9,6 +9,8 @@ CREATE TABLE users (
     encrypted_password VARCHAR(255) NOT NULL,
     birth_date DATE,
     avatar_name VARCHAR(65),
+    user_type ENUM('client', 'deliverer') NOT NULL DEFAULT 'client',
+    is_admin TINYINT(1) NOT NULL DEFAULT 0,
     UNIQUE KEY uq_users_email (email)
 ) ENGINE=InnoDB;
 

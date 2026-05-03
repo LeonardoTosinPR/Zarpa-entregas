@@ -1,0 +1,79 @@
+<section class="delivery-hero mb-3">
+    <div class="delivery-hero-content">
+        <span class="status-chip mb-3">
+            <i class="bi bi-speedometer2"></i> Admin
+        </span>
+        <h1 class="fw-bold mb-2">Painel administrativo</h1>
+        <p class="mb-0">Acompanhe os usuarios cadastrados e mantenha o controle da operacao Zarpa.</p>
+    </div>
+    <img class="delivery-hero-mobilete" src="/assets/images/mobilete.svg" alt="Mobilete administrativa">
+</section>
+
+<section class="metric-grid mb-3">
+    <div class="metric-tile">
+        <span>Usuarios</span>
+        <strong><?= count($users) ?></strong>
+    </div>
+    <div class="metric-tile">
+        <span>Clientes</span>
+        <strong><?= count(array_filter($users, fn($user) => $user->isClient())) ?></strong>
+    </div>
+    <div class="metric-tile">
+        <span>Entregadores</span>
+        <strong><?= count(array_filter($users, fn($user) => $user->isDeliverer())) ?></strong>
+    </div>
+</section>
+
+<section class="admin-panel">
+    <div class="d-flex align-items-center justify-content-between mb-2">
+        <h2 class="h5 mb-0">Usuarios</h2>
+        <i class="bi bi-people fs-4 text-success"></i>
+    </div>
+
+    <div class="d-md-none">
+        <?php foreach ($users as $user) : ?>
+        <article class="admin-user-card">
+            <div>
+                <div class="fw-semibold"><?= htmlspecialchars($user->name) ?></div>
+                <div class="text-muted small text-break"><?= htmlspecialchars($user->email) ?></div>
+            </div>
+            <span class="badge <?= $user->isAdmin() ? 'text-bg-warning' : 'text-bg-secondary' ?>">
+                <?= $user->isAdmin() ? 'Admin' : $user->userTypeLabel() ?>
+            </span>
+        </article>
+        <?php endforeach; ?>
+    </div>
+
+    <div class="table-responsive d-none d-md-block">
+        <table class="table table-hover align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>E-mail</th>
+                    <th>Nascimento</th>
+                    <th>Tipo</th>
+                    <th>Permissao</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($users as $user) : ?>
+                <tr>
+                    <td><?= htmlspecialchars($user->name) ?></td>
+                    <td><?= htmlspecialchars($user->email) ?></td>
+                    <td><?= $user->birth_date ? date('d/m/Y', strtotime($user->birth_date)) : '-' ?></td>
+                    <td>
+                        <span class="badge <?= $user->isDeliverer() ? 'text-bg-success' : 'text-bg-info' ?>">
+                            <?= $user->userTypeLabel() ?>
+                        </span>
+                    </td>
+                    <td>
+                        <span class="badge <?= $user->isAdmin() ? 'text-bg-warning' : 'text-bg-secondary' ?>">
+                            <?= $user->isAdmin() ? 'Admin' : 'Padrao' ?>
+                        </span>
+                    </td>
+                </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    </div>
+</section>

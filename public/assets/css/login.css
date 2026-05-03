@@ -1,3 +1,235 @@
-.card.login {
-  width: 24rem;
+:root {
+  --zarpa-ink: #15171a;
+  --zarpa-road: #22262b;
+  --zarpa-yellow: #ffc247;
+  --zarpa-teal: #2fb7a3;
+  --zarpa-red: #ef5b4d;
+  --zarpa-paper: #fffaf0;
+}
+
+* {
+  letter-spacing: 0;
+}
+
+body.auth-screen {
+  min-height: 100vh;
+  margin: 0;
+  color: var(--zarpa-ink);
+  background:
+    linear-gradient(160deg, rgba(21, 23, 26, 0.94), rgba(45, 50, 56, 0.86)),
+    radial-gradient(circle at 18% 18%, rgba(255, 194, 71, 0.22), transparent 32%),
+    radial-gradient(circle at 86% 28%, rgba(47, 183, 163, 0.26), transparent 30%),
+    #22262b;
+  overflow-x: hidden;
+}
+
+.auth-background {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.auth-road {
+  position: absolute;
+  left: -10vw;
+  right: -10vw;
+  bottom: 7vh;
+  height: 112px;
+  transform: rotate(-7deg);
+  background:
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.62) 0 48px, transparent 48px 88px),
+    linear-gradient(180deg, #2f343a, #17191d);
+  background-size: 136px 4px, auto;
+  background-position: 0 54px, center;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.45);
+  animation: road-markers 1.8s linear infinite;
+}
+
+.route-line {
+  position: absolute;
+  width: 240px;
+  height: 120px;
+  border: 2px dashed rgba(255, 194, 71, 0.38);
+  border-color: rgba(255, 194, 71, 0.42) transparent transparent rgba(255, 194, 71, 0.42);
+  border-radius: 32px 0 0 0;
+  animation: route-pulse 2.8s ease-in-out infinite;
+}
+
+.route-line.one {
+  top: 9vh;
+  left: -20px;
+}
+
+.route-line.two {
+  right: -70px;
+  bottom: 28vh;
+  transform: rotate(180deg);
+  animation-delay: 0.6s;
+}
+
+.floating-pin {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--zarpa-teal);
+  box-shadow: 0 0 0 8px rgba(47, 183, 163, 0.16);
+  animation: pin-bounce 2.4s ease-in-out infinite;
+}
+
+.floating-pin.first {
+  left: 18vw;
+  top: 18vh;
+}
+
+.floating-pin.second {
+  right: 17vw;
+  top: 58vh;
+  background: var(--zarpa-red);
+  box-shadow: 0 0 0 8px rgba(239, 91, 77, 0.16);
+  animation-delay: 0.5s;
+}
+
+.auth-wrap {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 460px);
+  padding: 18px;
+}
+
+.auth-card {
+  overflow: hidden;
+  border: 0;
+  border-radius: 8px;
+  background: rgba(255, 250, 240, 0.96);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.34);
+}
+
+.auth-card::before {
+  content: "";
+  display: block;
+  height: 5px;
+  background: linear-gradient(90deg, var(--zarpa-yellow), var(--zarpa-teal), var(--zarpa-red));
+}
+
+.brand-mobilete {
+  width: 82px;
+  height: auto;
+  animation: mobilete-idle 2.6s ease-in-out infinite;
+}
+
+.auth-kicker {
+  color: #6a6358;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+}
+
+.auth-title {
+  font-size: 1.55rem;
+}
+
+.form-control,
+.form-select,
+.btn {
+  min-height: 46px;
+  border-radius: 8px;
+}
+
+.form-control,
+.form-select {
+  border-color: #ded6c7;
+  background-color: #fffdf8;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--zarpa-teal);
+  box-shadow: 0 0 0 0.2rem rgba(47, 183, 163, 0.18);
+}
+
+.btn-zarpa {
+  color: #191919;
+  background: var(--zarpa-yellow);
+  border-color: var(--zarpa-yellow);
+}
+
+.btn-zarpa:hover,
+.btn-zarpa:focus {
+  color: #111;
+  background: #ffb92e;
+  border-color: #ffb92e;
+}
+
+.form-hint {
+  min-height: 18px;
+  color: #776f63;
+  font-size: 0.78rem;
+}
+
+.password-meter {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 5px;
+  height: 5px;
+  margin-top: 8px;
+}
+
+.password-meter span {
+  border-radius: 999px;
+  background: #ded6c7;
+  transition: background-color 160ms ease;
+}
+
+.password-meter[data-level="1"] span:nth-child(1) {
+  background: var(--zarpa-red);
+}
+
+.password-meter[data-level="2"] span:nth-child(-n+2) {
+  background: var(--zarpa-yellow);
+}
+
+.password-meter[data-level="3"] span {
+  background: var(--zarpa-teal);
+}
+
+@keyframes road-markers {
+  from { background-position: 0 54px, center; }
+  to { background-position: -136px 54px, center; }
+}
+
+@keyframes route-pulse {
+  0%, 100% { opacity: 0.35; transform: translateY(0); }
+  50% { opacity: 0.9; transform: translateY(-6px); }
+}
+
+@keyframes pin-bounce {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-9px) scale(1.08); }
+}
+
+@keyframes mobilete-idle {
+  0%, 100% { transform: translateY(0) rotate(-1deg); }
+  50% { transform: translateY(-4px) rotate(1deg); }
+}
+
+@media (max-width: 575.98px) {
+  body.auth-screen {
+    align-items: flex-start !important;
+    padding-top: 18px !important;
+  }
+
+  .auth-wrap {
+    padding: 12px;
+  }
+
+  .auth-card .card-body {
+    padding: 22px !important;
+  }
+
+  .auth-road {
+    bottom: 4vh;
+    height: 92px;
+  }
 }
