@@ -20,6 +20,17 @@
     </div>
 
     <div class="mb-3">
+        <label class="form-label">CPF</label>
+        <input type="text" name="user[cpf]"
+               class="form-control <?= $user->errors('cpf') ? 'is-invalid' : '' ?>"
+               value="<?= htmlspecialchars($user->cpf ?? '') ?>"
+               placeholder="000.000.000-00" maxlength="14" required>
+        <?php if ($user->errors('cpf')) : ?>
+            <div class="invalid-feedback"><?= $user->errors('cpf') ?></div>
+        <?php endif; ?>
+    </div>
+
+    <div class="mb-3">
         <label class="form-label" for="register-birth-date">Data de nascimento</label>
         <input id="register-birth-date" type="date" name="user[birth_date]" class="form-control <?= $user->errors('birth_date') ? 'is-invalid' : '' ?>"
                value="<?= htmlspecialchars($user->birth_date ?? '') ?>">

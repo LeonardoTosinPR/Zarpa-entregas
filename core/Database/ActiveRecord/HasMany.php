@@ -13,23 +13,32 @@ class HasMany
     ) {
     }
 
+    /**
+     * @return array<Model>
+     */
     public function get(): array
     {
         return $this->related::where([$this->foreignKey => $this->model->id]);
     }
 
+    /**
+     * @param array<string, mixed> $params
+     */
     public function new(array $params = []): Model
     {
         $params[$this->foreignKey] = $this->model->id;
+
         return new $this->related($params);
     }
 
     public function findById(int $id): ?Model
     {
-        return $this->related::findBy([
-            $this->foreignKey => $this->model->id,
-            'id' => $id,
-        ]);
+        return $this->related::findBy(
+            [
+                $this->foreignKey => $this->model->id,
+                'id' => $id,
+            ]
+        );
     }
 
     public function paginate(int $page = 1, int $per_page = 10, string $route = null): Paginator

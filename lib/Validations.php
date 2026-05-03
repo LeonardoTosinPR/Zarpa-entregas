@@ -72,6 +72,37 @@ class Validations
         return true;
     }
 
+    public static function cpf($attribute, $obj): bool
+    {
+        $cpf = preg_replace('/\D/', '', $obj->$attribute ?? '');
+
+        if (strlen($cpf) !== 11 || preg_match('/^(\d)\1{10}$/', $cpf)) {
+            $obj->addError($attribute, 'inválido!');
+            return false;
+        }
+
+        $sum = 0;
+        for ($i = 0; $i < 9; $i++) {
+            $sum += (int)$cpf[$i] * (10 - $i);
+        }
+        $remainder = $sum % 11;
+        $first = $remainder < 2 ? 0 : 11 - $remainder;
+
+        $sum = 0;
+        for ($i = 0; $i < 10; $i++) {
+            $sum += (int)$cpf[$i] * (11 - $i);
+        }
+        $remainder = $sum % 11;
+        $second = $remainder < 2 ? 0 : 11 - $remainder;
+
+        if ((int)$cpf[9] !== $first || (int)$cpf[10] !== $second) {
+            $obj->addError($attribute, 'inválido!');
+            return false;
+        }
+
+        return true;
+    }
+
     public static function uniqueness($fields, $object)
     {
         $dbFieldsValues = [];
