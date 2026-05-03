@@ -14,13 +14,13 @@ class AdminOnly implements Middleware
         $user = Auth::user();
 
         if ($user === null) {
-            FlashMessage::danger('VocÃª precisa estar logado para acessar esta pÃ¡gina.');
+            FlashMessage::danger('Você precisa estar logado para acessar esta página.');
             header('Location: ' . route('users.login'));
             exit;
         }
 
         if (!$user->isAdmin()) {
-            FlashMessage::danger('VocÃª nÃ£o tem permissÃ£o para acessar a Ã¡rea administrativa.');
+            FlashMessage::danger('Você não tem permissão para acessar a área administrativa.');
             header('Location: ' . route('home'));
             exit;
         }
