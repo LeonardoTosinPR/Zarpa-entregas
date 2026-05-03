@@ -20,7 +20,7 @@ class AuthenticationsController extends Controller
     public function authenticate(Request $request): void
     {
         $params = $request->getParam('user');
-        $user = User::findByEmailOrCpf($params['identifier']);
+        $user = User::findByIdentifier($params['identifier']);
 
         if ($user && $user->authenticate($params['password'])) {
             Auth::login($user);

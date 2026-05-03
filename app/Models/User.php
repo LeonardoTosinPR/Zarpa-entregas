@@ -89,7 +89,7 @@ class User extends Model
         return User::findBy(['cpf' => $cpf]);
     }
 
-    public static function findByEmailOrCpf(string $identifier): ?User
+    public static function findByIdentifier(string $identifier): ?User
     {
         return str_contains($identifier, '@')
             ? self::findByEmail($identifier)
