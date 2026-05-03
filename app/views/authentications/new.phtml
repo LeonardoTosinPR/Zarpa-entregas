@@ -2,9 +2,8 @@
 
 <form action="<?= route('users.authenticate') ?>" method="POST" data-validate-form novalidate>
     <div class="mb-3">
-        <label class="form-label" for="login-email">E-mail</label>
-        <input id="login-email" type="email" name="user[email]" class="form-control" placeholder="seu@email.com" autocomplete="email" required autofocus>
-        <div class="invalid-feedback">Informe um e-mail valido.</div>
+        <label class="form-label">E-mail ou CPF</label>
+        <input type="text" name="user[identifier]" class="form-control" placeholder="seu@email.com ou 000.000.000-00" required autofocus>
     </div>
 
     <div class="mb-4">

@@ -8,7 +8,7 @@ use Core\Database\ActiveRecord\Model;
 class User extends Model
 {
     protected static string $table = 'users';
-    protected static array $columns = ['name', 'email', 'encrypted_password', 'birth_date', 'avatar_name', 'user_type', 'is_admin'];
+    protected static array $columns = ['name', 'email', 'encrypted_password', 'birth_date', 'cpf', 'avatar_name', 'user_type', 'is_admin'];
 
     public const USER_TYPE_CLIENT = 'client';
     public const USER_TYPE_DELIVERER = 'deliverer';
@@ -36,6 +36,9 @@ class User extends Model
         Validations::notEmpty('email', $this);
         Validations::email('email', $this);
         Validations::uniqueness('email', $this);
+        Validations::notEmpty('cpf', $this);
+        Validations::cpf('cpf', $this);
+        Validations::uniqueness('cpf', $this);
         Validations::notFutureDate('birth_date', $this);
         Validations::inclusion('user_type', $this, [self::USER_TYPE_CLIENT, self::USER_TYPE_DELIVERER]);
 
@@ -78,6 +81,19 @@ class User extends Model
     public static function findByEmail(string $email): ?User
     {
         return User::findBy(['email' => $email]);
+    }
+
+    public static function findByCpf(string $cpf): ?User
+    {
+        $cpf = preg_replace('/\D/', '', $cpf);
+        return User::findBy(['cpf' => $cpf]);
+    }
+
+    public static function findByEmailOrCpf(string $identifier): ?User
+    {
+        return str_contains($identifier, '@')
+            ? self::findByEmail($identifier)
+            : self::findByCpf($identifier);
     }
 
     public function __set(string $property, mixed $value): void
