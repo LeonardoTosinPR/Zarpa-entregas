@@ -15,12 +15,24 @@
         <strong><?= count($users) ?></strong>
     </div>
     <div class="metric-tile">
-        <span>Clientes</span>
-        <strong><?= count(array_filter($users, fn($user) => $user->isClient())) ?></strong>
+        <span>Pedidos</span>
+        <strong><?= count($orders) ?></strong>
     </div>
     <div class="metric-tile">
         <span>Entregadores</span>
         <strong><?= count(array_filter($users, fn($user) => $user->isDeliverer())) ?></strong>
+    </div>
+</section>
+
+<section class="admin-panel mb-3">
+    <div class="d-flex align-items-center justify-content-between gap-2">
+        <div>
+            <h2 class="h5 mb-1">Pedidos da operacao</h2>
+            <p class="text-muted mb-0">Acesse todos os pedidos, independente do cliente, entregador ou status.</p>
+        </div>
+        <a class="btn btn-success" href="<?= route('orders.index') ?>">
+            <i class="bi bi-receipt"></i> Ver pedidos
+        </a>
     </div>
 </section>
 
@@ -37,8 +49,9 @@
                 <div class="fw-semibold"><?= htmlspecialchars($user->name) ?></div>
                 <div class="text-muted small text-break"><?= htmlspecialchars($user->email) ?></div>
             </div>
-            <span class="badge <?= $user->isAdmin() ? 'text-bg-warning' : 'text-bg-secondary' ?>">
-                <?= $user->isAdmin() ? 'Admin' : $user->userTypeLabel() ?>
+        <span class="role-pill <?= $user->isAdmin() ? 'role-admin' : ($user->isDeliverer() ? 'role-deliverer' : 'role-client') ?>">
+            <i class="bi <?= $user->isAdmin() ? 'bi-shield-check' : ($user->isDeliverer() ? 'bi-scooter' : 'bi-person') ?>"></i>
+            <?= $user->isAdmin() ? 'Administrador' : $user->userTypeLabel() ?>
             </span>
         </article>
         <?php endforeach; ?>
@@ -62,8 +75,9 @@
                     <td><?= htmlspecialchars($user->email) ?></td>
                     <td><?= $user->birth_date ? date('d/m/Y', strtotime($user->birth_date)) : '-' ?></td>
                     <td>
-                        <span class="badge <?= $user->isDeliverer() ? 'text-bg-success' : 'text-bg-info' ?>">
-                            <?= $user->userTypeLabel() ?>
+                        <span class="role-pill <?= $user->isAdmin() ? 'role-admin' : ($user->isDeliverer() ? 'role-deliverer' : 'role-client') ?>">
+                            <i class="bi <?= $user->isAdmin() ? 'bi-shield-check' : ($user->isDeliverer() ? 'bi-scooter' : 'bi-person') ?>"></i>
+                            <?= $user->isAdmin() ? 'Administrador' : $user->userTypeLabel() ?>
                         </span>
                     </td>
                     <td>

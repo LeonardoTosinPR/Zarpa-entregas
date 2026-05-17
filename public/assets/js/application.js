@@ -1,6 +1,7 @@
 document.addEventListener("DOMContentLoaded", function () {
   setupImagePreview();
   setupFormValidation();
+  setupOrderPricing();
 });
 
 function setupImagePreview() {
@@ -36,7 +37,7 @@ function setupFormValidation() {
     const confirmation = form.querySelector("[data-password-confirmation]");
     const meter = form.querySelector("[data-password-meter]");
 
-    form.querySelectorAll("input[required], input[type='email'], input[minlength]").forEach(function (input) {
+    form.querySelectorAll("input[required], textarea[required], select[required], input[type='email'], input[minlength]").forEach(function (input) {
       input.addEventListener("input", function () {
         validateInput(input);
         if (password && confirmation) validatePasswordMatch(password, confirmation);
@@ -51,7 +52,7 @@ function setupFormValidation() {
     form.addEventListener("submit", function (event) {
       let valid = true;
 
-      form.querySelectorAll("input[required], input[type='email'], input[minlength]").forEach(function (input) {
+      form.querySelectorAll("input[required], textarea[required], select[required], input[type='email'], input[minlength]").forEach(function (input) {
         if (!validateInput(input)) valid = false;
       });
 
@@ -94,7 +95,7 @@ function validatePasswordMatch(password, confirmation) {
 }
 
 function setInputState(input, message) {
-  const feedback = input.closest(".mb-3, .mb-4")?.querySelector(".invalid-feedback");
+  const feedback = input.closest(".mb-3, .mb-4, .col-12, .form-section")?.querySelector(".invalid-feedback");
 
   input.classList.toggle("is-invalid", message !== "");
   input.classList.toggle("is-valid", message === "" && input.value.trim() !== "");
@@ -113,4 +114,79 @@ function updatePasswordMeter(password, meter) {
   if (/[^A-Za-z0-9]/.test(value) || value.length >= 10) level++;
 
   meter.dataset.level = String(level);
+}
+
+function setupOrderPricing() {
+  document.querySelectorAll("[data-order-pricing]").forEach(function (form) {
+    const packageSize = form.querySelector("[data-package-size]");
+    const isFragile = form.querySelector("[data-is-fragile]");
+    const distanceKm = form.querySelector("[data-distance-km]");
+    const total = form.querySelector("[data-order-total]");
+    const pickupAddress = form.querySelector("[data-pickup-address]");
+    const deliveryAddress = form.querySelector("[data-delivery-address]");
+    const mapsLink = form.querySelector("[data-order-maps-link]");
+
+    const update = function () {
+      updateOrderTotal(packageSize, isFragile, distanceKm, total);
+      updateMapsLink(pickupAddress, deliveryAddress, mapsLink);
+    };
+
+    [packageSize, isFragile, distanceKm, pickupAddress, deliveryAddress].forEach(function (field) {
+      if (!field) return;
+      field.addEventListener("input", update);
+      field.addEventListener("change", update);
+    });
+
+    if (mapsLink) {
+      mapsLink.addEventListener("click", function (event) {
+        if (mapsLink.classList.contains("disabled")) {
+          event.preventDefault();
+        }
+      });
+    }
+
+    update();
+  });
+}
+
+function updateOrderTotal(packageSize, isFragile, distanceKm, total) {
+  if (!(packageSize && isFragile && distanceKm && total)) return;
+
+  const basePrices = {
+    pequeno: 10,
+    medio: 15,
+    grande: 20,
+  };
+
+  const base = basePrices[packageSize.value] || basePrices.pequeno;
+  const fragileFee = isFragile.checked ? 5 : 0;
+  const distance = Math.max(0, parseFloat(String(distanceKm.value).replace(",", ".")) || 0);
+  const finalPrice = base + fragileFee + distance * 0.10;
+
+  total.value = finalPrice.toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  });
+}
+
+function updateMapsLink(pickupAddress, deliveryAddress, mapsLink) {
+  if (!(pickupAddress && deliveryAddress && mapsLink)) return;
+
+  const origin = pickupAddress.value.trim();
+  const destination = deliveryAddress.value.trim();
+  const disabled = origin === "" || destination === "";
+
+  mapsLink.classList.toggle("disabled", disabled);
+  mapsLink.setAttribute("aria-disabled", disabled ? "true" : "false");
+
+  if (disabled) {
+    mapsLink.href = "#";
+    return;
+  }
+
+  mapsLink.href = "https://www.google.com/maps/dir/?api=1&origin="
+    + encodeURIComponent(origin)
+    + "&destination="
+    + encodeURIComponent(destination)
+    + "&travelmode=driving";
 }
