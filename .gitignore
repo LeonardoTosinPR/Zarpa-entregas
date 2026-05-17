@@ -20,3 +20,10 @@ html
 # Ignore files and folders inside uploads but keep it
 /public/assets/uploads/*
 !/public/assets/uploads/.gitkeep
+
+# Ignore test artifacts
+.phpunit.result.cache
+tests/Acceptance/_output/*
+!tests/Acceptance/_output/.gitkeep
+tests/Support/_generated/*
+!tests/Support/_generated/.gitkeep
