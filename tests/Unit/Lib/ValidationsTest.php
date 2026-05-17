@@ -25,7 +25,6 @@ class ValidationsTest extends TestCase
         return $obj;
     }
 
-    // notEmpty
     public function testNotEmptyReturnsFalseForNullValue(): void
     {
         $obj = $this->stub(['name' => null]);
@@ -42,7 +41,6 @@ class ValidationsTest extends TestCase
         $this->assertEmpty($obj->errors);
     }
 
-    // email
     public function testEmailReturnsFalseForInvalidEmail(): void
     {
         $obj = $this->stub(['email' => 'nao-e-email']);
@@ -59,7 +57,6 @@ class ValidationsTest extends TestCase
         $this->assertEmpty($obj->errors);
     }
 
-    // minLength
     public function testMinLengthReturnsFalseWhenTooShort(): void
     {
         $obj = $this->stub(['name' => 'AB']);
@@ -76,7 +73,6 @@ class ValidationsTest extends TestCase
         $this->assertEmpty($obj->errors);
     }
 
-    // notFutureDate
     public function testNotFutureDateReturnsFalseForFutureDate(): void
     {
         $obj = $this->stub(['birth_date' => '2099-12-31']);
@@ -101,7 +97,6 @@ class ValidationsTest extends TestCase
         $this->assertEmpty($obj->errors);
     }
 
-    // inclusion
     public function testInclusionReturnsFalseWhenValueNotInList(): void
     {
         $obj = $this->stub(['user_type' => 'superadmin']);
@@ -118,7 +113,6 @@ class ValidationsTest extends TestCase
         $this->assertEmpty($obj->errors);
     }
 
-    // passwordConfirmation
     public function testPasswordConfirmationReturnsFalseWhenMismatch(): void
     {
         $obj = $this->stub(['password' => '123456', 'password_confirmation' => 'diferente']);
@@ -135,7 +129,6 @@ class ValidationsTest extends TestCase
         $this->assertEmpty($obj->errors);
     }
 
-    // cpf
     public function testCpfReturnsTrueForKnownValidCpf(): void
     {
         $obj = $this->stub(['cpf' => '52998224725']);

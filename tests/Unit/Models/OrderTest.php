@@ -41,7 +41,7 @@ class OrderTest extends TestCase
         $user = new User([
             'name'                  => 'Admin Teste',
             'email'                 => 'admin@example.com',
-            'cpf'                   => '11144477735',
+            'cpf'                   => '39053344705',
             'password'              => '123456',
             'password_confirmation' => '123456',
             'user_type'             => User::USER_TYPE_CLIENT,
@@ -193,7 +193,6 @@ class OrderTest extends TestCase
             'distance_km'      => '10.00',
         ]);
 
-        // 10.00 base + 10km * 0.10/km = 11.00
         $this->assertEquals('11.00', $order->calculateShippingFee());
     }
 
@@ -209,7 +208,6 @@ class OrderTest extends TestCase
             'distance_km'      => '20.00',
         ]);
 
-        // 20.00 base + 5.00 fragile + 20km * 0.10 = 27.00
         $this->assertEquals('27.00', $order->calculateShippingFee());
     }
 
