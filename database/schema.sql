@@ -18,9 +18,6 @@ CREATE TABLE users (
     UNIQUE KEY uq_users_cpf (cpf)
 ) ENGINE=InnoDB;
 
-<<<<<<< HEAD
-SET foreign_key_checks = 1;
-=======
 CREATE TABLE orders (
     id INT AUTO_INCREMENT PRIMARY KEY,
     client_id INT NOT NULL,
@@ -48,4 +45,3 @@ CREATE TABLE notifications (
 ) ENGINE=InnoDB;
 
 SET foreign_key_checks = 1;
->>>>>>> 0cc946e0284b8e4ca1bb8243d616d0606faecdbd

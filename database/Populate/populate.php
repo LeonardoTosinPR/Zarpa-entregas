@@ -36,5 +36,5 @@ $pdo->exec("INSERT INTO orders (client_id, courier_id, pickup_address, delivery_
     ($joaoId, $leonardoId, 'Mercado Municipal - Box 14', 'Rua Sete de Setembro, 45 - Centro', 'medio', 1, 8.00, 'aceito', 'cartao', 20.80, 'ZP1002'),
     ($adminId, $williamId, 'Rua Projetada, 30 - Jardim Sul', 'Condominio Primavera, Bloco B', 'grande', 0, 15.00, 'em rota', 'dinheiro', 21.50, 'ZP1003')
 ");
-    
+
 echo "Banco populado!\n";
