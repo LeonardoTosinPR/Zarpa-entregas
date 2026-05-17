@@ -19,5 +19,5 @@ $pdo->exec("INSERT INTO users (name, email, encrypted_password, birth_date, user
     ('Leonardo Tosin', 'leonardo@zarpa.com', '$senha', '2000-03-22', 'deliverer', 0),
     ('William Veiga', 'william@zarpa.com', '$senha', '1995-11-08', 'deliverer', 0)
 ");
-
+    
 echo "Banco populado!\n";
