@@ -31,7 +31,7 @@ class OrdersCest extends BaseAcceptanceCest
             'delivery_address'  => 'Rua de Entrega, 456',
             'package_size'      => Order::PACKAGE_SMALL,
             'payment_method'    => Order::PAYMENT_PIX,
-            'distance_km'       => '0.00',
+            'distance_km'       => '1.00',
             'confirmation_code' => 'ABC123',
         ], $overrides));
         $order->save();
@@ -127,7 +127,22 @@ class OrdersCest extends BaseAcceptanceCest
         $page->see('Pedido cancelado com sucesso.');
     }
 
-    // 1.7 - Paginação dos registros (múltiplos pedidos aparecem na listagem)
+    // 1.7 - Tentativa de cadastro com km inválido
+    public function failsToCreateOrderWithInvalidDistanceKm(AcceptanceTester $page): void
+    {
+        $client = $this->makeClient();
+        $page->login($client->email, '123456');
+
+        $page->amOnPage('/orders/new');
+        $page->fillField('order[pickup_address]', 'Rua de Coleta, 100');
+        $page->fillField('order[delivery_address]', 'Rua de Entrega, 200');
+        $page->fillField('order[distance_km]', '-1');
+        $page->click('Salvar');
+
+        $page->see('Verifique os dados do pedido.');
+    }
+
+    // 1.8 - Paginação dos registros (múltiplos pedidos aparecem na listagem)
     public function listsMultipleOrdersOnIndexPage(AcceptanceTester $page): void
     {
         $client = $this->makeClient();

@@ -59,7 +59,7 @@ class OrderTest extends TestCase
             'delivery_address'  => 'Rua de Entrega, 456',
             'package_size'      => Order::PACKAGE_SMALL,
             'payment_method'    => Order::PAYMENT_PIX,
-            'distance_km'       => '0.00',
+            'distance_km'       => '1.00',
             'confirmation_code' => 'ABC123',
         ], $overrides));
         $order->save();
@@ -85,6 +85,7 @@ class OrderTest extends TestCase
             'client_id'        => $client->id,
             'pickup_address'   => 'Rua de Coleta, 123',
             'delivery_address' => 'Rua de Entrega, 456',
+            'distance_km'      => '1.00',
         ]);
 
         $this->assertTrue($order->save());
@@ -99,6 +100,20 @@ class OrderTest extends TestCase
             'pickup_address'   => 'Rua de Coleta, 123',
             'delivery_address' => 'Rua de Entrega, 456',
             'distance_km'      => '-5',
+        ]);
+
+        $this->assertFalse($order->save());
+        $this->assertNotEmpty($order->errors('distance_km'));
+    }
+
+    public function testSaveFailsWithZeroDistance(): void
+    {
+        $client = $this->makeClient();
+        $order = new Order([
+            'client_id'        => $client->id,
+            'pickup_address'   => 'Rua de Coleta, 123',
+            'delivery_address' => 'Rua de Entrega, 456',
+            'distance_km'      => '0',
         ]);
 
         $this->assertFalse($order->save());
