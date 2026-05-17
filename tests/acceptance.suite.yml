@@ -1,0 +1,13 @@
+actor: AcceptanceTester
+modules:
+  enabled:
+    - WebDriver:
+        url: "http://web"
+        browser: chrome
+        host: selenium
+        port: 4444
+        window_size: false
+        capabilities:
+          chromeOptions:
+            args: ["--headless", "--no-sandbox", "--disable-dev-shm-usage"]
+    - \Tests\Support\Helper\LoginHelper

@@ -14,6 +14,11 @@ class AuthenticationsController extends Controller
 
     public function new(): void
     {
+        if (Auth::check()) {
+            $this->redirectTo(route('home'));
+            return;
+        }
+
         $this->render('authentications/new');
     }
 
@@ -34,6 +39,11 @@ class AuthenticationsController extends Controller
 
     public function register(): void
     {
+        if (Auth::check()) {
+            $this->redirectTo(route('home'));
+            return;
+        }
+
         $user = new User();
         $this->render('authentications/register', compact('user'));
     }
