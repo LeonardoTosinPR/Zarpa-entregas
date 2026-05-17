@@ -1,0 +1,145 @@
+<?php
+use App\Models\Order;
+
+$user = $this->current_user;
+$pendingOrders = array_filter($orders, fn($order) => $order->status === Order::STATUS_PENDING);
+$activeOrders = array_filter($orders, fn($order) => in_array($order->status, [Order::STATUS_ACCEPTED, Order::STATUS_ON_ROUTE], true));
+$deliveredOrders = array_filter($orders, fn($order) => $order->status === Order::STATUS_DELIVERED);
+$heroText = $user->isAdmin()
+    ? 'Todos os pedidos cadastrados na operacao Zarpa.'
+    : ($user->isDeliverer() ? 'Pedidos pendentes e entregas aceitas por voce.' : 'Pedidos criados por voce e seus status de entrega.');
+?>
+
+<section class="delivery-hero mb-3">
+    <div class="delivery-hero-content">
+        <span class="status-chip mb-3">
+            <i class="bi bi-receipt"></i> Pedidos
+        </span>
+        <h1 class="fw-bold mb-2">Gerenciar pedidos</h1>
+        <p class="mb-0"><?= $heroText ?></p>
+    </div>
+    <img class="delivery-hero-mobilete" src="/assets/images/mobilete.svg" alt="Mobilete em entrega">
+</section>
+
+<section class="metric-grid mb-3">
+    <div class="metric-tile">
+        <span>Total</span>
+        <strong><?= count($orders) ?></strong>
+    </div>
+    <div class="metric-tile">
+        <span>Pendentes</span>
+        <strong><?= count($pendingOrders) ?></strong>
+    </div>
+    <div class="metric-tile">
+        <span><?= $user->isDeliverer() ? 'Em trabalho' : 'Entregues' ?></span>
+        <strong><?= $user->isDeliverer() ? count($activeOrders) : count($deliveredOrders) ?></strong>
+    </div>
+</section>
+
+<section class="orders-board">
+    <div class="section-toolbar mb-3">
+        <div>
+            <div class="profile-label">Fila de atendimento</div>
+            <h2 class="h5 mb-0">Pedidos</h2>
+        </div>
+        <?php if (!$user->isDeliverer() || $user->isAdmin()) : ?>
+        <a class="btn btn-success" href="<?= route('orders.new') ?>">
+            <i class="bi bi-plus-lg"></i> Novo pedido
+        </a>
+        <?php endif; ?>
+    </div>
+
+    <?php if (empty($orders)) : ?>
+        <div class="empty-state">
+            <i class="bi bi-inbox fs-3 text-muted"></i>
+            <p class="mb-0 text-muted">Nenhum pedido encontrado.</p>
+        </div>
+    <?php else : ?>
+        <div class="order-list">
+            <?php foreach ($orders as $order) : ?>
+            <?php
+            $client = $order->client();
+            $courier = $order->courier();
+            ?>
+            <article class="order-card">
+                <div class="order-card-main">
+                    <div class="order-card-top">
+                        <div>
+                            <div class="profile-label">Pedido</div>
+                            <h3 class="h6 mb-0">#<?= $order->id ?> para <?= htmlspecialchars($client?->name ?? 'Cliente') ?></h3>
+                            <div class="order-subtitle">
+                                <?= $order->packageSizeLabelText() ?><?= $order->isFragile() ? ' fragil' : '' ?> · <?= $order->formattedDistance() ?>
+                            </div>
+                        </div>
+                        <span class="badge <?= $order->statusBadgeClass() ?>"><?= $order->statusLabelText() ?></span>
+                    </div>
+
+                    <div class="route-line">
+                        <div class="route-point">
+                            <span class="route-dot pickup"></span>
+                            <div>
+                                <div class="profile-label">Coleta</div>
+                                <div class="fw-semibold text-break"><?= htmlspecialchars($order->pickup_address) ?></div>
+                            </div>
+                        </div>
+                        <div class="route-point">
+                            <span class="route-dot delivery"></span>
+                            <div>
+                                <div class="profile-label">Entrega</div>
+                                <div class="fw-semibold text-break"><?= htmlspecialchars($order->delivery_address) ?></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <aside class="order-card-side">
+                    <div>
+                        <div class="profile-label">Entregador</div>
+                        <div class="fw-semibold"><?= htmlspecialchars($courier?->name ?? 'Aguardando aceite') ?></div>
+                    </div>
+                    <div class="order-meta-grid">
+                        <div>
+                            <span>Frete</span>
+                            <strong><?= $order->formattedShippingFee() ?></strong>
+                        </div>
+                        <div>
+                            <span>Tipo</span>
+                            <strong><?= $order->packageSizeLabelText() ?></strong>
+                        </div>
+                    </div>
+                    <div class="order-actions">
+                        <a class="btn btn-outline-dark" href="<?= route('orders.show', ['id' => $order->id]) ?>">
+                            <i class="bi bi-eye"></i> Ver
+                        </a>
+                        <a class="btn btn-outline-dark" href="<?= htmlspecialchars($order->mapsUrl()) ?>" target="_blank" rel="noopener">
+                            <i class="bi bi-map"></i> Rota
+                        </a>
+                        <?php if ($order->canBeAcceptedBy($user)) : ?>
+                        <form action="<?= route('orders.accept', ['id' => $order->id]) ?>" method="POST">
+                            <button class="btn btn-success" type="submit">
+                                <i class="bi bi-check2"></i> Aceitar
+                            </button>
+                        </form>
+                        <?php endif; ?>
+                        <?php if ($order->canBeRefusedBy($user)) : ?>
+                        <form action="<?= route('orders.refuse', ['id' => $order->id]) ?>" method="POST">
+                            <button class="btn btn-outline-danger" type="submit">
+                                <i class="bi bi-x-lg"></i> Recusar
+                            </button>
+                        </form>
+                        <?php endif; ?>
+                        <?php if ($order->canBeDeletedBy($user)) : ?>
+                        <form action="<?= route('orders.destroy', ['id' => $order->id]) ?>" method="POST" onsubmit="return confirm('Cancelar este pedido?')">
+                            <input type="hidden" name="_method" value="DELETE">
+                            <button class="btn btn-outline-danger" type="submit">
+                                <i class="bi bi-trash"></i> <?= $user->isAdmin() ? 'Excluir' : 'Cancelar' ?>
+                            </button>
+                        </form>
+                        <?php endif; ?>
+                    </div>
+                </aside>
+            </article>
+            <?php endforeach; ?>
+        </div>
+    <?php endif; ?>
+</section>

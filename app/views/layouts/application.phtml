@@ -16,12 +16,19 @@
             <span>Zarpa</span>
         </a>
         <?php if ($this->current_user) : ?>
+        <div class="topbar-profile desktop-only">
+            <span class="role-pill <?= $this->current_user->isAdmin() ? 'role-admin' : ($this->current_user->isDeliverer() ? 'role-deliverer' : 'role-client') ?>">
+                <i class="bi <?= $this->current_user->isAdmin() ? 'bi-shield-check' : ($this->current_user->isDeliverer() ? 'bi-scooter' : 'bi-person') ?>"></i>
+                <?= $this->current_user->isAdmin() ? 'Admin' : $this->current_user->userTypeLabel() ?>
+            </span>
+        </div>
         <div class="dropdown desktop-only">
             <a class="nav-link text-white dropdown-toggle" data-bs-toggle="dropdown" href="#">
                 <i class="bi bi-person-circle"></i> <?= htmlspecialchars($this->current_user->name) ?>
             </a>
             <ul class="dropdown-menu dropdown-menu-end">
                 <li><span class="dropdown-item-text text-muted small"><?= htmlspecialchars($this->current_user->email) ?></span></li>
+                <li><a class="dropdown-item" href="<?= route('orders.index') ?>"><i class="bi bi-receipt"></i> Pedidos</a></li>
                 <?php if ($this->current_user->isAdmin()) : ?>
                 <li><a class="dropdown-item" href="<?= route('admin.dashboard') ?>"><i class="bi bi-speedometer2"></i> Admin</a></li>
                 <?php endif; ?>
@@ -33,8 +40,44 @@
     </div>
 </nav>
 
+<?php if ($this->current_user) : ?>
+<nav class="app-menu desktop-only" aria-label="Menu principal">
+    <div class="container app-menu-inner">
+        <a href="<?= route('home') ?>">
+            <i class="bi bi-house-door"></i>
+            <span>Inicio</span>
+        </a>
+        <a href="<?= route('orders.index') ?>">
+            <i class="bi bi-receipt"></i>
+            <span>Pedidos</span>
+        </a>
+        <?php if (!$this->current_user->isDeliverer() || $this->current_user->isAdmin()) : ?>
+        <a href="<?= route('orders.new') ?>">
+            <i class="bi bi-plus-circle"></i>
+            <span>Novo pedido</span>
+        </a>
+        <?php endif; ?>
+        <?php if ($this->current_user->isAdmin()) : ?>
+        <a href="<?= route('admin.dashboard') ?>">
+            <i class="bi bi-speedometer2"></i>
+            <span>Admin</span>
+        </a>
+        <?php endif; ?>
+    </div>
+</nav>
+<?php endif; ?>
+
 <main class="app-main mx-auto">
     <div class="flash-stack">
+        <?php if ($this->current_user) : ?>
+            <?php foreach (\App\Models\Notification::consumeFor($this->current_user) as $notification) : ?>
+                <div class="alert alert-info alert-dismissible py-2" role="alert">
+                    <?= htmlspecialchars($notification->message) ?>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+                </div>
+            <?php endforeach; ?>
+        <?php endif; ?>
+
         <?php foreach (\Lib\FlashMessage::get() as $type => $msg) : ?>
             <div class="alert alert-<?= $type ?> alert-dismissible py-2" role="alert">
                 <?= $msg ?>
@@ -51,6 +94,10 @@
     <a href="<?= route('home') ?>">
         <i class="bi bi-house-door"></i>
         <span>Inicio</span>
+    </a>
+    <a href="<?= route('orders.index') ?>">
+        <i class="bi bi-receipt"></i>
+        <span>Pedidos</span>
     </a>
     <?php if ($this->current_user->isAdmin()) : ?>
     <a href="<?= route('admin.dashboard') ?>">
