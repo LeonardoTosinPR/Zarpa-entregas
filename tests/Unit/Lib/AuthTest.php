@@ -28,7 +28,6 @@ class AuthTest extends TestCase
         return $user;
     }
 
-    // Auth::check()
     public function testCheckReturnsFalseWhenSessionIsEmpty(): void
     {
         $this->assertFalse(Auth::check());
@@ -42,7 +41,6 @@ class AuthTest extends TestCase
         $this->assertTrue(Auth::check());
     }
 
-    // Auth::login()
     public function testLoginStoresUserIdInSession(): void
     {
         $user = $this->makeUser();
@@ -51,7 +49,6 @@ class AuthTest extends TestCase
         $this->assertEquals($user->id, $_SESSION['user']['id']);
     }
 
-    // Auth::user()
     public function testUserReturnsNullWhenNotLoggedIn(): void
     {
         $this->assertNull(Auth::user());
@@ -69,7 +66,6 @@ class AuthTest extends TestCase
         $this->assertEquals($user->email, $loggedUser->email);
     }
 
-    // Auth::logout()
     public function testLogoutMakesCheckReturnFalse(): void
     {
         $user = $this->makeUser();
