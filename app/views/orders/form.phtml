@@ -116,7 +116,7 @@ $statusOptions = $isAdmin
             <div class="col-12 col-md-2">
                 <label class="form-label" for="order-distance-km">Km</label>
                 <input id="order-distance-km" type="number" name="order[distance_km]" class="form-control <?= $order->errors('distance_km') ? 'is-invalid' : '' ?>"
-                       value="<?= htmlspecialchars($order->distance_km ?? '0.00') ?>" min="0" step="0.01" data-distance-km required>
+                       value="<?= htmlspecialchars($order->distance_km ?? '') ?>" min="0.01" step="0.01" data-distance-km>
                 <div class="invalid-feedback"><?= htmlspecialchars($order->errors('distance_km') ?? 'Informe a distancia em km.') ?></div>
             </div>
             <div class="col-12 col-md-6">

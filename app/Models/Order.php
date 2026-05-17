@@ -87,8 +87,8 @@ class Order extends Model
         Validations::notEmpty('package_size', $this);
         Validations::inclusion('package_size', $this, array_keys(self::packageBasePrices()));
 
-        if (!is_numeric($this->distance_km) || (float) $this->distance_km < 0) {
-            $this->addError('distance_km', 'deve ser um valor maior ou igual a zero');
+        if (!is_numeric($this->distance_km) || (float) $this->distance_km <= 0) {
+            $this->addError('distance_km', 'deve ser um valor maior que zero');
         }
 
         $this->shipping_fee = $this->calculateShippingFee();
