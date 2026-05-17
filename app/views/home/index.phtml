@@ -1,18 +1,28 @@
 <?php
+use App\Models\Order;
+
 $isDeliverer = $this->current_user->isDeliverer();
-$heroText = $isDeliverer
+$isAdmin = $this->current_user->isAdmin();
+$totalOrders = count($orders);
+$pendingOrders = count(array_filter($orders, fn($order) => $order->status === Order::STATUS_PENDING));
+$activeOrders = count(array_filter($orders, fn($order) => in_array($order->status, [Order::STATUS_ACCEPTED, Order::STATUS_ON_ROUTE], true)));
+$deliveredOrders = count(array_filter($orders, fn($order) => $order->status === Order::STATUS_DELIVERED));
+$heroText = $isAdmin
+    ? 'Voce tem acesso administrativo para acompanhar usuarios, pedidos e a operacao completa.'
+    : ($isDeliverer
     ? 'Seu acesso esta pronto para receber corridas, acompanhar rotas e organizar entregas na mobilete.'
-    : 'Seu acesso esta pronto para criar pedidos, acompanhar coletas e enviar itens pela cidade.';
-$primaryMetric = $isDeliverer ? 'Corridas disponiveis' : 'Pedidos enviados';
-$secondaryMetric = $isDeliverer ? 'Rotas aceitas' : 'Coletas agendadas';
-$thirdMetric = $isDeliverer ? 'Ganhos estimados' : 'Economia estimada';
-$profileIcon = $isDeliverer ? 'bi-scooter' : 'bi-box-seam';
+    : 'Seu acesso esta pronto para criar pedidos, acompanhar coletas e enviar itens pela cidade.');
+$primaryMetric = $isAdmin ? 'Pedidos totais' : ($isDeliverer ? 'Corridas disponiveis' : 'Pedidos enviados');
+$secondaryMetric = $isAdmin ? 'Pedidos ativos' : ($isDeliverer ? 'Rotas aceitas' : 'Coletas agendadas');
+$profileIcon = $isAdmin ? 'bi-shield-check' : ($isDeliverer ? 'bi-scooter' : 'bi-box-seam');
+$profileRole = $isAdmin ? 'Administrador' : $this->current_user->userTypeLabel();
+$profileClass = $isAdmin ? 'role-admin' : ($isDeliverer ? 'role-deliverer' : 'role-client');
 ?>
 
 <section class="delivery-hero mb-3">
     <div class="delivery-hero-content">
         <span class="status-chip mb-3">
-            <i class="bi <?= $profileIcon ?>"></i> <?= $this->current_user->userTypeLabel() ?>
+            <i class="bi <?= $profileIcon ?>"></i> <?= $profileRole ?>
         </span>
         <h1 class="fw-bold mb-2">Ola, <?= htmlspecialchars($this->current_user->name) ?>.</h1>
         <p class="mb-0"><?= $heroText ?></p>
@@ -23,22 +33,30 @@ $profileIcon = $isDeliverer ? 'bi-scooter' : 'bi-box-seam';
 <section class="metric-grid mb-3">
     <div class="metric-tile">
         <span><?= $primaryMetric ?></span>
-        <strong>0</strong>
+        <strong><?= $isDeliverer && !$isAdmin ? $pendingOrders : $totalOrders ?></strong>
     </div>
     <div class="metric-tile">
         <span><?= $secondaryMetric ?></span>
-        <strong>0</strong>
+        <strong><?= $activeOrders ?></strong>
     </div>
     <div class="metric-tile">
-        <span><?= $thirdMetric ?></span>
-        <strong>R$ 0</strong>
+        <span><?= $isDeliverer && !$isAdmin ? 'Entregas finalizadas' : 'Pedidos entregues' ?></span>
+        <strong><?= $deliveredOrders ?></strong>
     </div>
 </section>
 
-<section class="profile-panel">
-    <div class="d-flex align-items-center justify-content-between mb-3">
-        <h2 class="h5 mb-0">Seu perfil</h2>
-        <i class="bi <?= $profileIcon ?> fs-4 text-success"></i>
+<section class="profile-panel profile-summary">
+    <div class="profile-summary-head mb-3">
+        <div class="profile-avatar <?= $profileClass ?>">
+            <i class="bi <?= $profileIcon ?>"></i>
+        </div>
+        <div>
+            <div class="profile-label">Perfil de acesso</div>
+            <h2 class="h5 mb-1"><?= $profileRole ?></h2>
+            <span class="role-pill <?= $profileClass ?>">
+                <i class="bi <?= $profileIcon ?>"></i> <?= $profileRole ?>
+            </span>
+        </div>
     </div>
     <div class="row g-3">
         <div class="col-12 col-sm-6">
@@ -65,5 +83,10 @@ $profileIcon = $isDeliverer ? 'bi-scooter' : 'bi-box-seam';
             <div class="fw-semibold">Administrador</div>
         </div>
         <?php endif; ?>
+    </div>
+    <div class="mt-3">
+        <a class="btn btn-success" href="<?= route('orders.index') ?>">
+            <i class="bi bi-receipt"></i> Ver pedidos
+        </a>
     </div>
 </section>

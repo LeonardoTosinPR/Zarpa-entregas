@@ -1,0 +1,182 @@
+<?php
+use App\Models\Order;
+
+$user = $this->current_user;
+$isNew = $order->newRecord();
+$isAdmin = $user->isAdmin();
+$isDeliverer = $user->isDeliverer() && !$isAdmin;
+$formAction = $isNew ? route('orders.create') : route('orders.update', ['id' => $order->id]);
+$statusOptions = $isAdmin
+    ? ($order->courier_id ? Order::statuses() : [Order::STATUS_PENDING, Order::STATUS_CANCELED])
+    : ($isDeliverer ? [Order::STATUS_ACCEPTED, Order::STATUS_ON_ROUTE, Order::STATUS_DELIVERED] : []);
+?>
+
+<section class="admin-panel order-form-panel">
+    <div class="section-toolbar mb-3">
+        <div>
+            <div class="profile-label"><?= $isNew ? 'Cadastro de pedido' : 'Edicao de pedido' ?></div>
+            <h1 class="h5 mb-0"><?= htmlspecialchars($title) ?></h1>
+        </div>
+        <a class="btn btn-sm btn-outline-dark" href="<?= $isNew ? route('orders.index') : route('orders.show', ['id' => $order->id]) ?>">
+            <i class="bi bi-arrow-left"></i> Voltar
+        </a>
+    </div>
+
+    <form action="<?= $formAction ?>" method="POST" data-validate-form data-order-pricing novalidate>
+        <?php if (!$isNew) : ?>
+            <input type="hidden" name="_method" value="PUT">
+        <?php endif; ?>
+
+        <?php if ($isAdmin) : ?>
+        <div class="form-section">
+            <div class="form-section-title">
+                <i class="bi bi-person-check"></i>
+                <div>
+                    <h2>Responsavel pelo pedido</h2>
+                    <p>O entregador sera vinculado apenas quando aceitar o pedido.</p>
+                </div>
+            </div>
+        <div class="row g-3">
+            <div class="col-12 col-md-6">
+                <label class="form-label" for="order-client-id">Cliente</label>
+                <select id="order-client-id" name="order[client_id]" class="form-select <?= $order->errors('client_id') ? 'is-invalid' : '' ?>" required>
+                    <?php foreach ($clients as $client) : ?>
+                    <option value="<?= $client->id ?>" <?= (int) $order->client_id === (int) $client->id ? 'selected' : '' ?>>
+                        <?= htmlspecialchars($client->name) ?>
+                    </option>
+                    <?php endforeach; ?>
+                </select>
+                <div class="invalid-feedback"><?= htmlspecialchars($order->errors('client_id') ?? 'Escolha um cliente.') ?></div>
+            </div>
+            <?php if (!$isNew) : ?>
+            <div class="col-12 col-md-6">
+                <div class="profile-label">Entregador</div>
+                <div class="fw-semibold"><?= htmlspecialchars($order->courier()?->name ?? 'Aguardando aceite') ?></div>
+            </div>
+            <?php endif; ?>
+        </div>
+        </div>
+        <?php endif; ?>
+
+        <?php if (!$isDeliverer) : ?>
+        <div class="form-section">
+            <div class="form-section-title">
+                <i class="bi bi-geo-alt"></i>
+                <div>
+                    <h2>Rota</h2>
+                    <p>Informe os enderecos completos para facilitar a coleta e a entrega.</p>
+                </div>
+            </div>
+            <div class="form-grid">
+                <div>
+                    <label class="form-label" for="order-pickup-address">Endereco de coleta</label>
+                    <textarea id="order-pickup-address" name="order[pickup_address]" class="form-control <?= $order->errors('pickup_address') ? 'is-invalid' : '' ?>" rows="4" data-pickup-address required><?= htmlspecialchars($order->pickup_address ?? '') ?></textarea>
+                    <div class="invalid-feedback"><?= htmlspecialchars($order->errors('pickup_address') ?? 'Informe o endereco de coleta.') ?></div>
+                </div>
+
+                <div>
+                    <label class="form-label" for="order-delivery-address">Endereco de entrega</label>
+                    <textarea id="order-delivery-address" name="order[delivery_address]" class="form-control <?= $order->errors('delivery_address') ? 'is-invalid' : '' ?>" rows="4" data-delivery-address required><?= htmlspecialchars($order->delivery_address ?? '') ?></textarea>
+                    <div class="invalid-feedback"><?= htmlspecialchars($order->errors('delivery_address') ?? 'Informe o endereco de entrega.') ?></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <div class="form-section-title">
+                <i class="bi bi-credit-card"></i>
+                <div>
+                    <h2>Tipo e valor</h2>
+                    <p>O valor final considera tipo, fragilidade e distancia da menor rota.</p>
+                </div>
+            </div>
+        <div class="row g-3">
+            <div class="col-12 col-md-4">
+                <label class="form-label" for="order-package-size">Tipo de pedido</label>
+                <select id="order-package-size" name="order[package_size]" class="form-select <?= $order->errors('package_size') ? 'is-invalid' : '' ?>" data-package-size required>
+                    <?php foreach (Order::packageBasePrices() as $packageSize => $basePrice) : ?>
+                    <option value="<?= $packageSize ?>" <?= $order->package_size === $packageSize ? 'selected' : '' ?>>
+                        <?= Order::packageSizeLabel($packageSize) ?> - R$ <?= number_format($basePrice, 2, ',', '.') ?>
+                    </option>
+                    <?php endforeach; ?>
+                </select>
+                <div class="invalid-feedback"><?= htmlspecialchars($order->errors('package_size') ?? 'Escolha um tipo valido.') ?></div>
+            </div>
+            <div class="col-12 col-md-6">
+                <label class="form-label" for="order-payment-method">Pagamento</label>
+                <select id="order-payment-method" name="order[payment_method]" class="form-select <?= $order->errors('payment_method') ? 'is-invalid' : '' ?>" required>
+                    <?php foreach (Order::paymentMethods() as $paymentMethod) : ?>
+                    <option value="<?= $paymentMethod ?>" <?= $order->payment_method === $paymentMethod ? 'selected' : '' ?>>
+                        <?= Order::paymentMethodLabel($paymentMethod) ?>
+                    </option>
+                    <?php endforeach; ?>
+                </select>
+                <div class="invalid-feedback"><?= htmlspecialchars($order->errors('payment_method') ?? 'Escolha uma forma de pagamento.') ?></div>
+            </div>
+            <div class="col-12 col-md-2">
+                <label class="form-label" for="order-distance-km">Km</label>
+                <input id="order-distance-km" type="number" name="order[distance_km]" class="form-control <?= $order->errors('distance_km') ? 'is-invalid' : '' ?>"
+                       value="<?= htmlspecialchars($order->distance_km ?? '0.00') ?>" min="0" step="0.01" data-distance-km required>
+                <div class="invalid-feedback"><?= htmlspecialchars($order->errors('distance_km') ?? 'Informe a distancia em km.') ?></div>
+            </div>
+            <div class="col-12 col-md-6">
+                <div class="form-check fragile-check">
+                    <input id="order-is-fragile" type="checkbox" name="order[is_fragile]" value="1" class="form-check-input" data-is-fragile <?= $order->isFragile() ? 'checked' : '' ?>>
+                    <label class="form-check-label" for="order-is-fragile">Pedido fragil (+ R$ 5,00)</label>
+                </div>
+            </div>
+            <div class="col-12 col-md-6">
+                <label class="form-label" for="order-total-preview">Valor total</label>
+                <input id="order-total-preview" type="text" class="form-control price-preview" value="<?= htmlspecialchars($order->formattedShippingFee()) ?>" data-order-total readonly>
+            </div>
+            <div class="col-12">
+                <a class="btn btn-outline-dark maps-link <?= $order->pickup_address && $order->delivery_address ? '' : 'disabled' ?>"
+                   href="<?= htmlspecialchars($order->pickup_address && $order->delivery_address ? $order->mapsUrl() : '#') ?>"
+                   target="_blank" rel="noopener" data-order-maps-link>
+                    <i class="bi bi-map"></i> Ver rota no Google Maps
+                </a>
+            </div>
+        </div>
+        </div>
+        <?php endif; ?>
+
+        <?php if (!$isNew && ($isAdmin || $isDeliverer)) : ?>
+        <div class="form-section">
+            <div class="form-section-title">
+                <i class="bi bi-flag"></i>
+                <div>
+                    <h2>Status</h2>
+                    <p>Acompanhe a etapa atual do pedido.</p>
+                </div>
+            </div>
+        <div class="row g-3">
+            <div class="col-12 col-md-6">
+                <label class="form-label" for="order-status">Status</label>
+                <select id="order-status" name="order[status]" class="form-select <?= $order->errors('status') ? 'is-invalid' : '' ?>" required>
+                    <?php foreach ($statusOptions as $status) : ?>
+                    <option value="<?= $status ?>" <?= $order->status === $status ? 'selected' : '' ?>>
+                        <?= Order::statusLabel($status) ?>
+                    </option>
+                    <?php endforeach; ?>
+                </select>
+                <div class="invalid-feedback"><?= htmlspecialchars($order->errors('status') ?? 'Escolha um status valido.') ?></div>
+            </div>
+            <?php if ($isAdmin) : ?>
+            <div class="col-12 col-md-6">
+                <label class="form-label" for="order-confirmation-code">Codigo de confirmacao</label>
+                <input id="order-confirmation-code" type="text" name="order[confirmation_code]" class="form-control"
+                       value="<?= htmlspecialchars($order->confirmation_code ?? '') ?>" maxlength="20">
+            </div>
+            <?php endif; ?>
+        </div>
+        </div>
+        <?php endif; ?>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-success">
+                <i class="bi bi-save"></i> Salvar
+            </button>
+            <a class="btn btn-outline-dark" href="<?= $isNew ? route('orders.index') : route('orders.show', ['id' => $order->id]) ?>">Cancelar</a>
+        </div>
+    </form>
+</section>

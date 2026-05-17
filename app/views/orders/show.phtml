@@ -1,0 +1,106 @@
+<?php
+$user = $this->current_user;
+$client = $order->client();
+$courier = $order->courier();
+?>
+
+<section class="delivery-hero mb-3">
+    <div class="delivery-hero-content">
+        <span class="status-chip mb-3">
+            <i class="bi bi-receipt"></i> Pedido #<?= $order->id ?>
+        </span>
+        <h1 class="fw-bold mb-2"><?= $order->statusLabelText() ?></h1>
+        <p class="mb-0"><?= htmlspecialchars($order->pickup_address) ?> para <?= htmlspecialchars($order->delivery_address) ?></p>
+    </div>
+    <img class="delivery-hero-mobilete" src="/assets/images/mobilete.svg" alt="Mobilete em entrega">
+</section>
+
+<section class="admin-panel mb-3">
+    <div class="d-flex align-items-center justify-content-between gap-2 mb-3">
+        <h2 class="h5 mb-0">Detalhes</h2>
+        <span class="badge <?= $order->statusBadgeClass() ?>"><?= $order->statusLabelText() ?></span>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-12 col-md-6">
+            <div class="profile-label">Cliente</div>
+            <div class="fw-semibold"><?= htmlspecialchars($client?->name ?? '-') ?></div>
+        </div>
+        <div class="col-12 col-md-6">
+            <div class="profile-label">Entregador</div>
+            <div class="fw-semibold"><?= htmlspecialchars($courier?->name ?? '-') ?></div>
+        </div>
+        <div class="col-12 col-md-6">
+            <div class="profile-label">Coleta</div>
+            <div class="fw-semibold text-break"><?= htmlspecialchars($order->pickup_address) ?></div>
+        </div>
+        <div class="col-12 col-md-6">
+            <div class="profile-label">Entrega</div>
+            <div class="fw-semibold text-break"><?= htmlspecialchars($order->delivery_address) ?></div>
+        </div>
+        <div class="col-12 col-sm-4">
+            <div class="profile-label">Tipo</div>
+            <div class="fw-semibold"><?= $order->packageSizeLabelText() ?></div>
+        </div>
+        <div class="col-12 col-sm-4">
+            <div class="profile-label">Fragil</div>
+            <div class="fw-semibold"><?= $order->isFragile() ? 'Sim' : 'Nao' ?></div>
+        </div>
+        <div class="col-12 col-sm-4">
+            <div class="profile-label">Distancia</div>
+            <div class="fw-semibold"><?= $order->formattedDistance() ?></div>
+        </div>
+        <div class="col-12 col-sm-4">
+            <div class="profile-label">Pagamento</div>
+            <div class="fw-semibold"><?= $order->paymentMethodLabelText() ?></div>
+        </div>
+        <div class="col-12 col-sm-4">
+            <div class="profile-label">Frete</div>
+            <div class="fw-semibold"><?= $order->formattedShippingFee() ?></div>
+        </div>
+        <div class="col-12 col-sm-4">
+            <div class="profile-label">Codigo</div>
+            <div class="fw-semibold"><?= htmlspecialchars($order->confirmation_code ?? '-') ?></div>
+        </div>
+        <div class="col-12 col-sm-4">
+            <div class="profile-label">Criado em</div>
+            <div class="fw-semibold"><?= $order->created_at ? date('d/m/Y H:i', strtotime($order->created_at)) : '-' ?></div>
+        </div>
+    </div>
+</section>
+
+<section class="action-bar">
+    <a class="btn btn-outline-dark" href="<?= route('orders.index') ?>">
+        <i class="bi bi-arrow-left"></i> Voltar
+    </a>
+    <?php if ($order->canBeAcceptedBy($user)) : ?>
+    <form action="<?= route('orders.accept', ['id' => $order->id]) ?>" method="POST">
+        <button class="btn btn-success" type="submit">
+            <i class="bi bi-check2"></i> Aceitar pedido
+        </button>
+    </form>
+    <?php endif; ?>
+    <a class="btn btn-outline-dark" href="<?= htmlspecialchars($order->mapsUrl()) ?>" target="_blank" rel="noopener">
+        <i class="bi bi-map"></i> Ver rota
+    </a>
+    <?php if ($order->canBeRefusedBy($user)) : ?>
+    <form action="<?= route('orders.refuse', ['id' => $order->id]) ?>" method="POST">
+        <button class="btn btn-outline-danger" type="submit">
+            <i class="bi bi-x-lg"></i> Recusar pedido
+        </button>
+    </form>
+    <?php endif; ?>
+    <?php if ($order->canBeEditedBy($user)) : ?>
+    <a class="btn btn-primary" href="<?= route('orders.edit', ['id' => $order->id]) ?>">
+        <i class="bi bi-pencil"></i> Editar
+    </a>
+    <?php endif; ?>
+    <?php if ($order->canBeDeletedBy($user)) : ?>
+    <form action="<?= route('orders.destroy', ['id' => $order->id]) ?>" method="POST" onsubmit="return confirm('<?= $user->isAdmin() ? 'Excluir' : 'Cancelar' ?> este pedido?')">
+        <input type="hidden" name="_method" value="DELETE">
+        <button class="btn btn-outline-danger" type="submit">
+            <i class="bi bi-trash"></i> <?= $user->isAdmin() ? 'Excluir' : 'Cancelar pedido' ?>
+        </button>
+    </form>
+    <?php endif; ?>
+</section>
