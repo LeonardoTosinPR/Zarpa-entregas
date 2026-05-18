@@ -9,7 +9,7 @@ class ValidationsTest extends TestCase
 {
     private function stub(array $props = []): object
     {
-        $obj = new class {
+        $obj = new #[\AllowDynamicProperties] class {
             public array $errors = [];
 
             public function addError(string $field, string $message): void
