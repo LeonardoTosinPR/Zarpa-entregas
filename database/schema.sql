@@ -31,6 +31,8 @@ CREATE TABLE orders (
     payment_method ENUM('dinheiro', 'pix', 'cartao') NOT NULL DEFAULT 'pix',
     shipping_fee DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
     confirmation_code VARCHAR(20),
+    pickup_start_at DATETIME NULL,
+    pickup_end_at DATETIME NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_orders_client FOREIGN KEY (client_id) REFERENCES users(id) ON DELETE CASCADE,
     CONSTRAINT fk_orders_courier FOREIGN KEY (courier_id) REFERENCES users(id) ON DELETE SET NULL

@@ -187,9 +187,6 @@ class OrdersController extends Controller
         return $order;
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     private function orderParams(Request $request, ?Order $order): array
     {
         $user = $this->currentUser();
@@ -207,7 +204,9 @@ class OrdersController extends Controller
                 'status' => $order === null ? Order::STATUS_PENDING : ($params['status'] ?? $order->status),
                 'payment_method' => $params['payment_method'] ?? $order?->payment_method ?? Order::PAYMENT_PIX,
                 'shipping_fee' => $order?->shipping_fee,
-                'confirmation_code' => trim($params['confirmation_code'] ?? $order?->confirmation_code ?? $this->confirmationCode())
+                'confirmation_code' => trim($params['confirmation_code'] ?? $order?->confirmation_code ?? $this->confirmationCode()),
+                'pickup_start_at' => $params['pickup_start_at'] ?? $order?->pickup_start_at,
+                'pickup_end_at' => $params['pickup_end_at'] ?? $order?->pickup_end_at
             ];
         }
 
@@ -226,7 +225,9 @@ class OrdersController extends Controller
                 'status' => in_array($status, $allowedStatuses, true) ? $status : $order?->status,
                 'payment_method' => $order?->payment_method,
                 'shipping_fee' => $order?->shipping_fee,
-                'confirmation_code' => $order?->confirmation_code
+                'confirmation_code' => $order?->confirmation_code,
+                'pickup_start_at' => $order?->pickup_start_at,
+                'pickup_end_at' => $order?->pickup_end_at
             ];
         }
 
@@ -241,13 +242,12 @@ class OrdersController extends Controller
             'status' => $order?->status ?? Order::STATUS_PENDING,
             'payment_method' => $params['payment_method'] ?? $order?->payment_method ?? Order::PAYMENT_PIX,
             'shipping_fee' => $order?->shipping_fee,
-            'confirmation_code' => $order?->confirmation_code ?? $this->confirmationCode()
+            'confirmation_code' => $order?->confirmation_code ?? $this->confirmationCode(),
+            'pickup_start_at' => $params['pickup_start_at'] ?? $order?->pickup_start_at,
+            'pickup_end_at' => $params['pickup_end_at'] ?? $order?->pickup_end_at
         ];
     }
 
-    /**
-     * @return array<User>
-     */
     private function clientsForForm(): array
     {
         return array_filter(User::all(), fn($user) => $user->isClient() || $user->isAdmin());

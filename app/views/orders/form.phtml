@@ -80,6 +80,24 @@ $statusOptions = $isAdmin
                     <div class="invalid-feedback"><?= htmlspecialchars($order->errors('delivery_address') ?? 'Informe o endereco de entrega.') ?></div>
                 </div>
             </div>
+            <div class="row g-3 mt-1">
+                <div class="col-12 col-md-6">
+                    <label class="form-label" for="order-pickup-start-at">Inicio da janela de coleta</label>
+                    <input id="order-pickup-start-at" type="datetime-local" name="order[pickup_start_at]"
+                           class="<?= $order->errors('pickup_start_at') ? 'is-invalid' : '' ?>"
+                           value="<?= htmlspecialchars($order->pickup_start_at ? date('Y-m-d\TH:i', strtotime($order->pickup_start_at)) : '') ?>"
+                           data-pickup-start-at required>
+                    <div class="invalid-feedback"><?= htmlspecialchars($order->errors('pickup_start_at') ?? 'Informe o inicio da coleta.') ?></div>
+                </div>
+                <div class="col-12 col-md-6">
+                    <label class="form-label" for="order-pickup-end-at">Fim da janela de coleta</label>
+                    <input id="order-pickup-end-at" type="datetime-local" name="order[pickup_end_at]"
+                           class="<?= $order->errors('pickup_end_at') ? 'is-invalid' : '' ?>"
+                           value="<?= htmlspecialchars($order->pickup_end_at ? date('Y-m-d\TH:i', strtotime($order->pickup_end_at)) : '') ?>"
+                           data-pickup-end-at required>
+                    <div class="invalid-feedback"><?= htmlspecialchars($order->errors('pickup_end_at') ?? 'Informe o fim da coleta.') ?></div>
+                </div>
+            </div>
         </div>
 
         <div class="form-section">

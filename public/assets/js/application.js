@@ -36,6 +36,8 @@ function setupFormValidation() {
     const password = form.querySelector("[data-password]");
     const confirmation = form.querySelector("[data-password-confirmation]");
     const meter = form.querySelector("[data-password-meter]");
+    const pickupStartAt = form.querySelector("[data-pickup-start-at]");
+    const pickupEndAt = form.querySelector("[data-pickup-end-at]");
 
     form.querySelectorAll("input[required], textarea[required], select[required], input[type='email'], input[minlength]").forEach(function (input) {
       input.addEventListener("input", function () {
@@ -49,6 +51,15 @@ function setupFormValidation() {
       });
     });
 
+    if (pickupStartAt && pickupEndAt) {
+      pickupStartAt.addEventListener("input", function () {
+        if (pickupEndAt.value) validatePickupRange(pickupStartAt, pickupEndAt);
+      });
+      pickupEndAt.addEventListener("input", function () {
+        validatePickupRange(pickupStartAt, pickupEndAt);
+      });
+    }
+
     form.addEventListener("submit", function (event) {
       let valid = true;
 
@@ -57,6 +68,10 @@ function setupFormValidation() {
       });
 
       if (password && confirmation && !validatePasswordMatch(password, confirmation)) {
+        valid = false;
+      }
+
+      if (pickupStartAt && pickupEndAt && !validatePickupRange(pickupStartAt, pickupEndAt)) {
         valid = false;
       }
 
@@ -98,11 +113,24 @@ function setInputState(input, message) {
   const feedback = input.closest(".mb-3, .mb-4, .col-12, .form-section")?.querySelector(".invalid-feedback");
 
   input.classList.toggle("is-invalid", message !== "");
-  input.classList.toggle("is-valid", message === "" && input.value.trim() !== "");
+  input.classList.remove("is-valid");
 
   if (feedback && message !== "") {
     feedback.textContent = message;
   }
+}
+
+function validatePickupRange(startInput, endInput) {
+  const start = startInput.value;
+  const end = endInput.value;
+
+  if (start && end && new Date(end) <= new Date(start)) {
+    setInputState(endInput, "Deve ser posterior ao inicio da coleta.");
+    return false;
+  }
+
+  if (end) setInputState(endInput, "");
+  return true;
 }
 
 function updatePasswordMeter(password, meter) {

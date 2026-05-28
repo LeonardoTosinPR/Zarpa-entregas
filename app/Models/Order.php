@@ -22,6 +22,8 @@ class Order extends Model
         'payment_method',
         'shipping_fee',
         'confirmation_code',
+        'pickup_start_at',
+        'pickup_end_at',
         'created_at'
     ];
 
@@ -100,6 +102,10 @@ class Order extends Model
         if ($this->courier_id === null && in_array($this->status, [self::STATUS_ACCEPTED, self::STATUS_ON_ROUTE, self::STATUS_DELIVERED], true)) {
             $this->addError('status', 'precisa ser aceito por um entregador');
         }
+
+        Validations::notEmpty('pickup_start_at', $this);
+        Validations::notEmpty('pickup_end_at', $this);
+        Validations::dateAfter('pickup_end_at', $this, 'pickup_start_at');
     }
 
     public static function statuses(): array
@@ -261,9 +267,7 @@ class Order extends Model
             && in_array($this->status, [self::STATUS_ACCEPTED, self::STATUS_ON_ROUTE], true);
     }
 
-    /**
-     * @return array<Order>
-     */
+
     public static function visibleFor(User $user): array
     {
         if ($user->isAdmin()) {
@@ -272,31 +276,25 @@ class Order extends Model
 
         if ($user->isDeliverer()) {
             return self::fromSql(
-                'SELECT id, client_id, courier_id, pickup_address, delivery_address, package_size, is_fragile, distance_km, status, payment_method, shipping_fee, confirmation_code, created_at FROM orders WHERE status = :status OR courier_id = :courier_id ORDER BY created_at DESC',
+                'SELECT id, client_id, courier_id, pickup_address, delivery_address, package_size, is_fragile, distance_km, status, payment_method, shipping_fee, confirmation_code, pickup_start_at, pickup_end_at, created_at FROM orders WHERE status = :status OR courier_id = :courier_id ORDER BY created_at DESC',
                 ['status' => self::STATUS_PENDING, 'courier_id' => $user->id]
             );
         }
 
         return self::fromSql(
-            'SELECT id, client_id, courier_id, pickup_address, delivery_address, package_size, is_fragile, distance_km, status, payment_method, shipping_fee, confirmation_code, created_at FROM orders WHERE client_id = :client_id ORDER BY created_at DESC',
+            'SELECT id, client_id, courier_id, pickup_address, delivery_address, package_size, is_fragile, distance_km, status, payment_method, shipping_fee, confirmation_code, pickup_start_at, pickup_end_at, created_at FROM orders WHERE client_id = :client_id ORDER BY created_at DESC',
             ['client_id' => $user->id]
         );
     }
 
-    /**
-     * @return array<Order>
-     */
+
     public static function orderedByCreatedAt(): array
     {
         return self::fromSql(
-            'SELECT id, client_id, courier_id, pickup_address, delivery_address, package_size, is_fragile, distance_km, status, payment_method, shipping_fee, confirmation_code, created_at FROM orders ORDER BY created_at DESC'
+            'SELECT id, client_id, courier_id, pickup_address, delivery_address, package_size, is_fragile, distance_km, status, payment_method, shipping_fee, confirmation_code, pickup_start_at, pickup_end_at, created_at FROM orders ORDER BY created_at DESC'
         );
     }
-
-    /**
-     * @param array<string, mixed> $params
-     * @return array<Order>
-     */
+    
     private static function fromSql(string $sql, array $params = []): array
     {
         $pdo = Database::getDatabaseConn();

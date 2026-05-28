@@ -103,6 +103,23 @@ class Validations
         return true;
     }
 
+    public static function dateAfter($attribute, $obj, $otherAttribute): bool
+    {
+        if (!$obj->$attribute || !$obj->$otherAttribute) {
+            return true;
+        }
+
+        $value = strtotime($obj->$attribute);
+        $other = strtotime($obj->$otherAttribute);
+
+        if ($value === false || $other === false || $value < $other) {
+            $obj->addError($attribute, "deve ser posterior a {$otherAttribute}");
+            return false;
+        }
+
+        return true;
+    }
+
     public static function uniqueness($fields, $object)
     {
         $dbFieldsValues = [];
