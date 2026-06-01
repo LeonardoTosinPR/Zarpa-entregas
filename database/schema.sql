@@ -1,5 +1,6 @@
 SET foreign_key_checks = 0;
 
+DROP TABLE IF EXISTS order_delivery_photos;
 DROP TABLE IF EXISTS orders;
 DROP TABLE IF EXISTS notifications;
 DROP TABLE IF EXISTS users;
@@ -34,6 +35,17 @@ CREATE TABLE orders (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_orders_client FOREIGN KEY (client_id) REFERENCES users(id) ON DELETE CASCADE,
     CONSTRAINT fk_orders_courier FOREIGN KEY (courier_id) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB;
+
+CREATE TABLE order_delivery_photos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    order_id INT NOT NULL,
+    file_name VARCHAR(120) NOT NULL,
+    original_name VARCHAR(255) NOT NULL,
+    mime_type VARCHAR(30) NOT NULL,
+    size_bytes INT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_order_delivery_photos_order FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
 CREATE TABLE notifications (

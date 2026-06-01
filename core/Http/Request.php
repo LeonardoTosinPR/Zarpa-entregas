@@ -10,6 +10,9 @@ class Request
     /** @var mixed[] */
     private array $params;
 
+    /** @var mixed[] */
+    private array $files;
+
     /** @var array<string, string> */
     private array $headers;
 
@@ -18,6 +21,7 @@ class Request
         $this->method = $_REQUEST['_method'] ?? $_SERVER['REQUEST_METHOD'];
         $this->uri = $_SERVER['REQUEST_URI'];
         $this->params = $_REQUEST;
+        $this->files = $_FILES;
         $this->headers = function_exists('getallheaders') ? getallheaders() : [];
     }
 
@@ -57,5 +61,10 @@ class Request
     public function getParam(string $key, mixed $default = null): mixed
     {
         return $this->params[$key] ?? $default;
+    }
+
+    public function getFile(string $key, mixed $default = []): mixed
+    {
+        return $this->files[$key] ?? $default;
     }
 }

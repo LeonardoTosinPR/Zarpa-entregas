@@ -2,6 +2,9 @@
 $user = $this->current_user;
 $client = $order->client();
 $courier = $order->courier();
+$deliveryPhotos = $order->deliveryPhotos()->get();
+$canUploadDeliveryPhotos = $order->canReceiveDeliveryPhotosFrom($user);
+$canManageDeliveryPhotos = $order->canManageDeliveryPhotosBy($user);
 ?>
 
 <section class="delivery-hero mb-3">
@@ -67,6 +70,59 @@ $courier = $order->courier();
             <div class="fw-semibold"><?= $order->created_at ? date('d/m/Y H:i', strtotime($order->created_at)) : '-' ?></div>
         </div>
     </div>
+</section>
+
+<section class="admin-panel delivery-proof-panel mb-3">
+    <div class="section-toolbar mb-3">
+        <div>
+            <div class="profile-label">Galeria</div>
+            <h2 class="h5 mb-0">Comprovantes de entrega</h2>
+        </div>
+        <span class="badge text-bg-light"><?= count($deliveryPhotos) ?> foto<?= count($deliveryPhotos) === 1 ? '' : 's' ?></span>
+    </div>
+
+    <?php if ($canUploadDeliveryPhotos) : ?>
+    <form class="proof-upload-form mb-3" action="<?= route('order_delivery_photos.create', ['id' => $order->id]) ?>" method="POST" enctype="multipart/form-data">
+        <div class="proof-upload-field">
+            <label class="form-label" for="delivery-photos">Fotos do comprovante</label>
+            <input id="delivery-photos" class="form-control" type="file" name="delivery_photos[]" accept="image/jpeg,image/png" multiple required>
+        </div>
+        <button class="btn btn-success" type="submit">
+            <i class="bi bi-cloud-arrow-up"></i> Anexar
+        </button>
+    </form>
+    <?php endif; ?>
+
+    <?php if (empty($deliveryPhotos)) : ?>
+        <div class="empty-state proof-empty">
+            <i class="bi bi-images fs-3 text-muted"></i>
+            <p class="mb-0 text-muted">Nenhum comprovante anexado.</p>
+        </div>
+    <?php else : ?>
+        <div class="delivery-proof-grid">
+            <?php foreach ($deliveryPhotos as $photo) : ?>
+            <figure class="delivery-proof-card">
+                <a href="<?= htmlspecialchars($photo->publicPath()) ?>" target="_blank" rel="noopener">
+                    <img src="<?= htmlspecialchars($photo->publicPath()) ?>" alt="<?= htmlspecialchars($photo->original_name) ?>">
+                </a>
+                <figcaption>
+                    <div>
+                        <strong><?= htmlspecialchars($photo->original_name) ?></strong>
+                        <span><?= htmlspecialchars($photo->formattedSize()) ?></span>
+                    </div>
+                    <?php if ($canManageDeliveryPhotos) : ?>
+                    <form action="<?= route('order_delivery_photos.destroy', ['id' => $order->id, 'photo_id' => $photo->id]) ?>" method="POST" onsubmit="return confirm('Remover este comprovante?')">
+                        <input type="hidden" name="_method" value="DELETE">
+                        <button class="btn btn-sm btn-outline-danger" type="submit" title="Remover comprovante" aria-label="Remover comprovante">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </form>
+                    <?php endif; ?>
+                </figcaption>
+            </figure>
+            <?php endforeach; ?>
+        </div>
+    <?php endif; ?>
 </section>
 
 <section class="action-bar">
