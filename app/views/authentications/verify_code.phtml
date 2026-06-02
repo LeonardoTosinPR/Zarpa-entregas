@@ -1,0 +1,39 @@
+<h2 class="h5 text-center mb-4">Verificação de código</h2>
+
+<form action="<?= route('password.send_code') ?>" method="POST">
+    <div class="mb-3">
+        <label class="form-label">E-mail</label>
+        <div class="input-group">
+            <input type="email" name="email"
+                   class="form-control"
+                   value="<?= htmlspecialchars($_SESSION['password_reset_email'] ?? '') ?>"
+                   placeholder="seu@email.com" required>
+            <button type="submit" class="btn btn-zarpa fw-bold">
+                <i class="bi bi-send"></i> Enviar
+            </button>
+        </div>
+    </div>
+</form>
+
+<?php if (!empty($_SESSION['password_reset_email'])): ?>
+
+<form action="<?= route('password.handle_code') ?>" method="POST" class="mt-4">
+    <div class="mb-3">
+        <label class="form-label">Código recebido</label>
+        <input type="text" name="code"
+               class="form-control text-center fw-bold fs-5"
+               maxlength="4" inputmode="numeric" pattern="[0-9]{4}"
+               placeholder="0000" autofocus required>
+    </div>
+    <div class="d-grid">
+        <button type="submit" class="btn btn-zarpa fw-bold">
+            <i class="bi bi-shield-check me-1"></i> Verificar
+        </button>
+    </div>
+</form>
+
+<?php endif; ?>
+
+<p class="text-center text-muted small mt-3 mb-0">
+    Lembrou a senha? <a href="<?= route('users.login') ?>">Entrar</a>
+</p>

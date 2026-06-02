@@ -8,7 +8,7 @@ use Core\Database\ActiveRecord\Model;
 class User extends Model
 {
     protected static string $table = 'users';
-    protected static array $columns = ['name', 'email', 'encrypted_password', 'birth_date', 'cpf', 'avatar_name', 'user_type', 'is_admin'];
+    protected static array $columns = ['name', 'email', 'encrypted_password', 'birth_date', 'cpf', 'avatar_name', 'username', 'phone', 'user_type', 'is_admin', 'code'];
 
     public const USER_TYPE_CLIENT = 'client';
     public const USER_TYPE_DELIVERER = 'deliverer';
@@ -36,6 +36,12 @@ class User extends Model
         Validations::notEmpty('email', $this);
         Validations::email('email', $this);
         Validations::uniqueness('email', $this);
+        Validations::notEmpty('username', $this);
+        Validations::minLength('username', $this, 3);
+        Validations::uniqueness('username', $this);
+        Validations::notEmpty('phone', $this);
+        Validations::phone('phone', $this);
+        Validations::uniqueness('phone', $this);
         Validations::notEmpty('cpf', $this);
         Validations::cpf('cpf', $this);
         Validations::uniqueness('cpf', $this);
@@ -89,11 +95,23 @@ class User extends Model
         return User::findBy(['cpf' => $cpf]);
     }
 
+    public static function findByUsername(string $username): ?User
+    {
+        return User::findBy(['username' => $username]);
+    }
+
+    public static function findByPhone(string $phone): ?User
+    {
+        $phone = preg_replace('/\D/', '', $phone);
+        return User::findBy(['phone' => $phone]);
+    }
+
     public static function findByIdentifier(string $identifier): ?User
     {
-        return str_contains($identifier, '@')
-            ? self::findByEmail($identifier)
-            : self::findByCpf($identifier);
+        if (str_contains($identifier, '@')) return self::findByEmail($identifier);
+        if (str_contains($identifier, '(')) return self::findByPhone($identifier);
+        if (preg_match('/^\d/', $identifier)) return self::findByCpf($identifier);
+        return self::findByUsername($identifier);
     }
 
     public function __set(string $property, mixed $value): void
@@ -103,6 +121,10 @@ class User extends Model
         }
 
         if ($property === 'cpf' && $value !== null && $value !== '') {
+            $value = preg_replace('/\D/', '', $value);
+        }
+
+        if ($property === 'phone' && $value !== null && $value !== '') {
             $value = preg_replace('/\D/', '', $value);
         }
 

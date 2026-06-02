@@ -71,4 +71,54 @@ class AuthenticationsController extends Controller
         FlashMessage::success('Até logo!');
         $this->redirectTo(route('users.login'));
     }
+
+    public function verifyCode(): void
+    {
+        $this->render('authentications/verify_code');
+    }
+
+    public function sendCode(Request $request): void
+    {
+        $email = $request->getParam('email');
+        $user = User::findByEmail($email);
+
+        if (!$user) {
+            FlashMessage::danger('E-mail não encontrado.');
+            $this->redirectTo(route('password.verify'));
+            return;
+        }
+
+        $code = random_int(1000, 9999);
+        $user->update(['code' => $code]);
+
+        $_SESSION['password_reset_email'] = $email;
+        $_SESSION['reset_attempts'] = 0;
+
+        FlashMessage::success('Código enviado para o seu e-mail.');
+        $this->render('authentications/verify_code');
+    }
+
+    public function handleCode(Request $request): void
+    {
+        $email = $_SESSION['password_reset_email'] ?? null;
+        $submitted = $request->getParam('code');
+
+        if (!$email) {
+            $this->redirectTo(route('password.verify'));
+            return;
+        }
+
+        $user = User::findByEmail($email);
+
+        if ($user && (string) $user->code === (string) $submitted) {
+            $user->update(['code' => null]);
+            unset($_SESSION['password_reset_email'], $_SESSION['reset_attempts']);
+            FlashMessage::success('Código verificado! Faça login para continuar.');
+            $this->redirectTo(route('users.login'));
+        } else {
+            $_SESSION['reset_attempts'] = ($_SESSION['reset_attempts'] ?? 0) + 1;
+            FlashMessage::danger('Código inválido. Tente novamente.');
+            $this->render('authentications/verify_code');
+        }
+    }
 }

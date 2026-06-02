@@ -12,10 +12,15 @@ CREATE TABLE users (
     birth_date DATE,
     cpf VARCHAR(14),
     avatar_name VARCHAR(65),
+    username VARCHAR(50),
+    phone VARCHAR(20),
     user_type ENUM('client', 'deliverer') NOT NULL DEFAULT 'client',
     is_admin TINYINT(1) NOT NULL DEFAULT 0,
+    code VARCHAR(4) NULL,
     UNIQUE KEY uq_users_email (email),
-    UNIQUE KEY uq_users_cpf (cpf)
+    UNIQUE KEY uq_users_cpf (cpf),
+    UNIQUE KEY uq_users_username (username),
+    UNIQUE KEY uq_users_phone (phone)
 ) ENGINE=InnoDB;
 
 CREATE TABLE orders (

@@ -20,6 +20,24 @@
     </div>
 
     <div class="mb-3">
+        <label class="form-label" for="register-username">Username</label>
+        <input id="register-username" type="text" name="user[username]"
+               class="form-control <?= $user->errors('username') ? 'is-invalid' : '' ?>"
+               value="<?= htmlspecialchars($user->username ?? '') ?>"
+               autocomplete="username" minlength="3" required>
+        <div class="invalid-feedback"><?= htmlspecialchars($user->errors('username') ?? 'Informe um username (min. 3 caracteres).') ?></div>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label" for="register-phone">Telefone</label>
+        <input id="register-phone" type="tel" name="user[phone]"
+               class="form-control <?= $user->errors('phone') ? 'is-invalid' : '' ?>"
+               value="<?= htmlspecialchars($user->phone ?? '') ?>"
+               placeholder="(00) 00000-0000" autocomplete="tel" required>
+        <div class="invalid-feedback"><?= htmlspecialchars($user->errors('phone') ?? 'Informe um telefone com DDD.') ?></div>
+    </div>
+
+    <div class="mb-3">
         <label class="form-label">CPF</label>
         <input type="text" name="user[cpf]"
                class="form-control <?= $user->errors('cpf') ? 'is-invalid' : '' ?>"

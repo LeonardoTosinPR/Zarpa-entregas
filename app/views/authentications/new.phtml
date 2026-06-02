@@ -7,7 +7,10 @@
     </div>
 
     <div class="mb-4">
-        <label class="form-label" for="login-password">Senha</label>
+        <label class="form-label d-flex justify-content-between" for="login-password">
+            Senha
+            <a href="<?= route('password.verify') ?>" class="small text-muted">Esqueci minha senha</a>
+        </label>
         <input id="login-password" type="password" name="user[password]" class="form-control" placeholder="Sua senha" autocomplete="current-password" minlength="6" required>
         <div class="invalid-feedback">Informe sua senha.</div>
     </div>

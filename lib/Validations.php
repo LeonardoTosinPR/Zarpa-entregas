@@ -103,6 +103,18 @@ class Validations
         return true;
     }
 
+    public static function phone($attribute, $obj): bool
+    {
+        $digits = preg_replace('/\D/', '', $obj->$attribute ?? '');
+
+        if (strlen($digits) < 10 || strlen($digits) > 11) {
+            $obj->addError($attribute, 'deve ter 10 ou 11 dígitos (com DDD)');
+            return false;
+        }
+
+        return true;
+    }
+
     public static function dateAfter($attribute, $obj, $otherAttribute): bool
     {
         if (!$obj->$attribute || !$obj->$otherAttribute) {

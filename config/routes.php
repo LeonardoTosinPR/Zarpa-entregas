@@ -12,6 +12,11 @@ Route::post('/login', [AuthenticationsController::class, 'authenticate'])->name(
 Route::get('/register', [AuthenticationsController::class, 'register'])->name('users.register');
 Route::post('/register', [AuthenticationsController::class, 'create'])->name('users.create');
 
+Route::get('/forgot-password', [AuthenticationsController::class, 'verifyCode'])->name('password.forgot');
+Route::get('/verify-code', [AuthenticationsController::class, 'verifyCode'])->name('password.verify');
+Route::post('/send-code', [AuthenticationsController::class, 'sendCode'])->name('password.send_code');
+Route::post('/verify-code', [AuthenticationsController::class, 'handleCode'])->name('password.handle_code');
+
 Route::middleware('auth')->group(function () {
     Route::get('/', [HomeController::class, 'index'])->name('root');
     Route::get('/home', [HomeController::class, 'index'])->name('home');
