@@ -26,6 +26,8 @@ Route::middleware('auth')->group(function () {
     Route::delete('/orders/{id}', [OrdersController::class, 'destroy'])->name('orders.destroy');
     Route::post('/orders/{id}/accept', [OrdersController::class, 'accept'])->name('orders.accept');
     Route::post('/orders/{id}/refuse', [OrdersController::class, 'refuse'])->name('orders.refuse');
+    Route::post('/orders/{id}/delivery-photos', [OrdersController::class, 'uploadDeliveryPhotos'])->name('order_delivery_photos.create');
+    Route::delete('/orders/{id}/delivery-photos/{photo_id}', [OrdersController::class, 'destroyDeliveryPhoto'])->name('order_delivery_photos.destroy');
 });
 
 Route::middleware('admin')->group(function () {

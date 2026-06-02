@@ -512,6 +512,66 @@ body.app-screen {
   opacity: 0.55;
 }
 
+.proof-upload-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: end;
+  padding-top: 14px;
+  border-top: 1px solid rgba(22, 24, 28, 0.08);
+}
+
+.delivery-proof-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.delivery-proof-card {
+  overflow: hidden;
+  margin: 0;
+  border: 1px solid rgba(22, 24, 28, 0.08);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.delivery-proof-card a {
+  display: block;
+  aspect-ratio: 4 / 3;
+  background: rgba(22, 24, 28, 0.04);
+}
+
+.delivery-proof-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.delivery-proof-card figcaption {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+  padding: 10px;
+}
+
+.delivery-proof-card strong,
+.delivery-proof-card span {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.delivery-proof-card strong {
+  font-size: 0.86rem;
+}
+
+.delivery-proof-card span {
+  color: var(--zarpa-muted);
+  font-size: 0.76rem;
+}
+
 .btn {
   border-radius: 8px;
   font-weight: 700;
@@ -564,7 +624,8 @@ body.app-screen {
   }
 
   .form-grid,
-  .order-meta-grid {
+  .order-meta-grid,
+  .proof-upload-form {
     grid-template-columns: 1fr;
   }
 

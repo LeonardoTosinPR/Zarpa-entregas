@@ -22,7 +22,7 @@ $statusOptions = $isAdmin
         </a>
     </div>
 
-    <form action="<?= $formAction ?>" method="POST" data-validate-form data-order-pricing novalidate>
+    <form action="<?= $formAction ?>" method="POST" enctype="multipart/form-data" data-validate-form data-order-pricing novalidate>
         <?php if (!$isNew) : ?>
             <input type="hidden" name="_method" value="PUT">
         <?php endif; ?>
@@ -166,6 +166,11 @@ $statusOptions = $isAdmin
                 <label class="form-label" for="order-confirmation-code">Codigo de confirmacao</label>
                 <input id="order-confirmation-code" type="text" name="order[confirmation_code]" class="form-control"
                        value="<?= htmlspecialchars($order->confirmation_code ?? '') ?>" maxlength="20">
+            </div>
+            <?php elseif ($isDeliverer && $order->canReceiveDeliveryPhotosFrom($user)) : ?>
+            <div class="col-12">
+                <label class="form-label" for="delivery-photos">Fotos do comprovante</label>
+                <input id="delivery-photos" class="form-control" type="file" name="delivery_photos[]" accept="image/jpeg,image/png" multiple>
             </div>
             <?php endif; ?>
         </div>

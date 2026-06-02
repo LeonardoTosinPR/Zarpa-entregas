@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Core\Database\ActiveRecord\HasMany;
 use Core\Database\ActiveRecord\Model;
 use Core\Database\Database;
 use Lib\Validations;
@@ -181,6 +182,11 @@ class Order extends Model
         return $this->courier_id ? User::findById((int) $this->courier_id) : null;
     }
 
+    public function deliveryPhotos(): HasMany
+    {
+        return $this->hasMany(OrderDeliveryPhoto::class, 'order_id');
+    }
+
     public function statusLabelText(): string
     {
         return self::statusLabel($this->status);
@@ -259,6 +265,18 @@ class Order extends Model
         return $user->isDeliverer()
             && (int) $this->courier_id === (int) $user->id
             && in_array($this->status, [self::STATUS_ACCEPTED, self::STATUS_ON_ROUTE], true);
+    }
+
+    public function canReceiveDeliveryPhotosFrom(User $user): bool
+    {
+        return $user->isDeliverer()
+            && (int) $this->courier_id === (int) $user->id
+            && in_array($this->status, [self::STATUS_ACCEPTED, self::STATUS_ON_ROUTE, self::STATUS_DELIVERED], true);
+    }
+
+    public function canManageDeliveryPhotosBy(User $user): bool
+    {
+        return $user->isAdmin() || $this->canReceiveDeliveryPhotosFrom($user);
     }
 
     /**

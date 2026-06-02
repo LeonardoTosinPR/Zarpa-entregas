@@ -12,6 +12,9 @@ $senha = password_hash('password123', PASSWORD_DEFAULT);
 $adminSenha = password_hash('admin123', PASSWORD_DEFAULT);
 
 if ($pdo->query("SHOW TABLES LIKE 'orders'")->fetchColumn()) {
+    if ($pdo->query("SHOW TABLES LIKE 'order_delivery_photos'")->fetchColumn()) {
+        $pdo->exec("DELETE FROM order_delivery_photos");
+    }
     $pdo->exec("DELETE FROM orders");
 }
 if ($pdo->query("SHOW TABLES LIKE 'notifications'")->fetchColumn()) {

@@ -394,6 +394,57 @@ class OrderTest extends TestCase
         $this->assertFalse($order->canBeRefusedBy($deliverer));
     }
 
+    // 3.1 - canReceiveDeliveryPhotosFrom()
+
+    public function testAssignedDelivererCanUploadDeliveryPhotos(): void
+    {
+        $client = $this->makeClient();
+        $deliverer = $this->makeDeliverer();
+        $order = $this->makeOrder($client, [
+            'status'     => Order::STATUS_ON_ROUTE,
+            'courier_id' => $deliverer->id,
+        ]);
+
+        $this->assertTrue($order->canReceiveDeliveryPhotosFrom($deliverer));
+    }
+
+    public function testUnassignedDelivererCannotUploadDeliveryPhotos(): void
+    {
+        $client = $this->makeClient();
+        $deliverer = $this->makeDeliverer();
+        $otherDeliverer = $this->makeDeliverer([
+            'email' => 'outro.entregador@example.com',
+            'cpf'   => '39053344705',
+        ]);
+        $order = $this->makeOrder($client, [
+            'status'     => Order::STATUS_ON_ROUTE,
+            'courier_id' => $deliverer->id,
+        ]);
+
+        $this->assertFalse($order->canReceiveDeliveryPhotosFrom($otherDeliverer));
+    }
+
+    public function testClientCannotUploadDeliveryPhotos(): void
+    {
+        $client = $this->makeClient();
+        $deliverer = $this->makeDeliverer();
+        $order = $this->makeOrder($client, [
+            'status'     => Order::STATUS_ON_ROUTE,
+            'courier_id' => $deliverer->id,
+        ]);
+
+        $this->assertFalse($order->canReceiveDeliveryPhotosFrom($client));
+    }
+
+    public function testAdminCanManageDeliveryPhotos(): void
+    {
+        $admin = $this->makeAdmin();
+        $client = $this->makeClient();
+        $order = $this->makeOrder($client);
+
+        $this->assertTrue($order->canManageDeliveryPhotosBy($admin));
+    }
+
     // 3.1 - isFragile()
 
     public function testIsFragileReturnsTrueWhenSet(): void
@@ -459,5 +510,22 @@ class OrderTest extends TestCase
         $ids = array_map(fn($o) => $o->id, $visible);
         $this->assertContains($pending->id, $ids);
         $this->assertContains($assigned->id, $ids);
+    }
+
+    public function testVisibleForDelivererIncludesTheirDeliveredOrders(): void
+    {
+        $client = $this->makeClient();
+        $deliverer = $this->makeDeliverer();
+
+        $delivered = $this->makeOrder($client, [
+            'status'            => Order::STATUS_DELIVERED,
+            'courier_id'        => $deliverer->id,
+            'confirmation_code' => 'DLV001',
+        ]);
+
+        $visible = Order::visibleFor($deliverer);
+
+        $ids = array_map(fn($o) => $o->id, $visible);
+        $this->assertContains($delivered->id, $ids);
     }
 }
