@@ -6,6 +6,7 @@ use App\Models\Notification;
 use App\Models\Order;
 use App\Models\Tag;
 use App\Models\User;
+use App\Services\DeliveryProofUploader;
 use Core\Http\Controllers\Controller;
 use Core\Http\Request;
 use Lib\FlashMessage;
@@ -87,22 +88,46 @@ class OrdersController extends Controller
     {
         $order = $this->findVisibleOrder($request);
         $user = $this->currentUser();
+        $previousStatus = $order->status;
 
         if (!$order->canBeEditedBy($user)) {
             FlashMessage::danger('Voce nao pode alterar este pedido.');
             $this->redirectTo(route('orders.show', ['id' => $order->id]));
         }
 
+        $deliveryPhotoResult = $this->storeDeliveryPhotosFromRequest($request, $order, false);
+        if (!empty($deliveryPhotoResult['errors'])) {
+            FlashMessage::danger(implode(' ', $deliveryPhotoResult['errors']));
+            $clients = $this->clientsForForm();
+            $title = 'Editar pedido #' . $order->id;
+            $this->render('orders/form', compact('title', 'order', 'clients'));
+            return;
+        }
+
         foreach ($this->orderParams($request, $order) as $property => $value) {
             $order->$property = $value;
         }
 
+        if (
+            $user->isDeliverer()
+            && $order->status === Order::STATUS_DELIVERED
+            && empty($order->deliveryPhotos()->get())
+        ) {
+            FlashMessage::danger('Anexe pelo menos uma foto de comprovacao antes de finalizar a entrega.');
+            $clients = $this->clientsForForm();
+            $title = 'Editar pedido #' . $order->id;
+            $this->render('orders/form', compact('title', 'order', 'clients'));
+            return;
+        }
+
         if ($order->save()) {
-            if ($order->status === Order::STATUS_DELIVERED) {
-                $this->finishDeliveredOrder($order);
+            if ($previousStatus !== Order::STATUS_DELIVERED && $order->status === Order::STATUS_DELIVERED) {
+                $this->notifyDeliveredOrder($order);
+                FlashMessage::success('Pedido entregue. O comprovante ficou salvo na galeria.');
+            } else {
+                FlashMessage::success('Pedido atualizado com sucesso.');
             }
 
-            FlashMessage::success('Pedido atualizado com sucesso.');
             $this->redirectTo(route('orders.show', ['id' => $order->id]));
         }
 
@@ -121,6 +146,8 @@ class OrdersController extends Controller
             FlashMessage::danger('Voce nao pode excluir este pedido.');
             $this->redirectTo(route('orders.show', ['id' => $order->id]));
         }
+
+        (new DeliveryProofUploader())->removeAllForOrder($order);
 
         if ($order->destroy()) {
             FlashMessage::success($user->isAdmin() ? 'Pedido excluido com sucesso.' : 'Pedido cancelado com sucesso.');
@@ -148,6 +175,54 @@ class OrdersController extends Controller
             FlashMessage::success('Pedido aceito com sucesso.');
         } else {
             FlashMessage::danger('Nao foi possivel aceitar o pedido.');
+        }
+
+        $this->redirectTo(route('orders.show', ['id' => $order->id]));
+    }
+
+    public function uploadDeliveryPhotos(Request $request): void
+    {
+        $order = $this->findVisibleOrder($request);
+        $user = $this->currentUser();
+
+        if (!$order->canReceiveDeliveryPhotosFrom($user)) {
+            FlashMessage::danger('Voce nao pode anexar comprovantes neste pedido.');
+            $this->redirectTo(route('orders.show', ['id' => $order->id]));
+        }
+
+        $result = $this->storeDeliveryPhotosFromRequest($request, $order, true);
+
+        if (!empty($result['errors'])) {
+            FlashMessage::danger(implode(' ', $result['errors']));
+        } else {
+            $count = count($result['photos']);
+            FlashMessage::success($count === 1 ? 'Foto anexada com sucesso.' : "{$count} fotos anexadas com sucesso.");
+        }
+
+        $this->redirectTo(route('orders.show', ['id' => $order->id]));
+    }
+
+    public function destroyDeliveryPhoto(Request $request): void
+    {
+        $order = $this->findVisibleOrder($request);
+        $user = $this->currentUser();
+
+        if (!$order->canManageDeliveryPhotosBy($user)) {
+            FlashMessage::danger('Voce nao pode remover este comprovante.');
+            $this->redirectTo(route('orders.show', ['id' => $order->id]));
+        }
+
+        $photo = $order->deliveryPhotos()->findById((int) $request->getParam('photo_id'));
+
+        if ($photo === null) {
+            FlashMessage::danger('Comprovante nao encontrado.');
+            $this->redirectTo(route('orders.show', ['id' => $order->id]));
+        }
+
+        if ((new DeliveryProofUploader())->remove($photo)) {
+            FlashMessage::success('Comprovante removido do pedido e do filesystem.');
+        } else {
+            FlashMessage::danger('Nao foi possivel remover o comprovante.');
         }
 
         $this->redirectTo(route('orders.show', ['id' => $order->id]));
@@ -303,16 +378,31 @@ class OrdersController extends Controller
         return strtoupper(substr(bin2hex(random_bytes(4)), 0, 6));
     }
 
-    private function finishDeliveredOrder(Order $order): void
+    /**
+     * @return array{photos: array<\App\Models\OrderDeliveryPhoto>, errors: array<string>}
+     */
+    private function storeDeliveryPhotosFromRequest(Request $request, Order $order, bool $requireFiles): array
+    {
+        $uploader = new DeliveryProofUploader();
+        $fileBag = $request->getFile('delivery_photos', []);
+        $files = $uploader->normalizeFiles($fileBag);
+
+        if (!$requireFiles && empty($files)) {
+            return ['photos' => [], 'errors' => []];
+        }
+
+        if (!empty($files) && !$order->canReceiveDeliveryPhotosFrom($this->currentUser())) {
+            return ['photos' => [], 'errors' => ['Voce nao pode anexar comprovantes neste pedido.']];
+        }
+
+        return $uploader->storeForOrder($order, $fileBag);
+    }
+
+    private function notifyDeliveredOrder(Order $order): void
     {
         Notification::createFor(
             (int) $order->client_id,
             'Seu pedido #' . $order->id . ' foi entregue. Obrigado por usar o Zarpa.'
         );
-
-        $order->destroy();
-
-        FlashMessage::success('Pedido entregue. O cliente foi notificado e o pedido foi removido.');
-        $this->redirectTo(route('orders.index'));
     }
 }

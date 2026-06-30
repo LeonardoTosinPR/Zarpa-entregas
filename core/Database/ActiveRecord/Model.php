@@ -230,7 +230,8 @@ abstract class Model
         return ($stmt->rowCount() != 0);
     }
 
-    public static function findById(int $id): static|null
+    public static function findById(int $id): static|null 
+    // SELECT * FROM {table} WHERE id = :id LIMIT 1` → retorna uma instância ou `null`.
     {
         $pdo = Database::getDatabaseConn();
 
