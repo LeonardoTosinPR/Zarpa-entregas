@@ -1,7 +1,13 @@
 <?php
+use App\Models\Tag;
+
 $user = $this->current_user;
 $client = $order->client();
 $courier = $order->courier();
+$tags = $order->tags()->get();
+$canManageTags = $order->canManageTagsBy($user);
+$attachedTagIds = array_map(fn($tag) => (int) $tag->id, $tags);
+$availableTags = array_filter(Tag::orderedByName(), fn($tag) => !in_array((int) $tag->id, $attachedTagIds, true));
 ?>
 
 <section class="delivery-hero mb-3">
@@ -67,6 +73,59 @@ $courier = $order->courier();
             <div class="fw-semibold"><?= $order->created_at ? date('d/m/Y H:i', strtotime($order->created_at)) : '-' ?></div>
         </div>
     </div>
+</section>
+
+<section class="admin-panel mb-3">
+    <div class="section-toolbar mb-3">
+        <div>
+            <div class="profile-label">Relacao N:N</div>
+            <h2 class="h5 mb-0">Etiquetas</h2>
+        </div>
+        <span class="badge text-bg-light"><?= count($tags) ?> etiqueta<?= count($tags) === 1 ? '' : 's' ?></span>
+    </div>
+
+    <?php if (empty($tags)) : ?>
+        <div class="empty-state">
+            <i class="bi bi-tags fs-3 text-muted"></i>
+            <p class="mb-0 text-muted">Nenhuma etiqueta vinculada.</p>
+        </div>
+    <?php else : ?>
+        <div class="d-flex flex-wrap gap-2 mb-3">
+            <?php foreach ($tags as $tag) : ?>
+            <span class="badge <?= $tag->badgeClass() ?> d-inline-flex align-items-center gap-2">
+                <i class="bi bi-tag"></i> <?= htmlspecialchars($tag->name) ?>
+                <?php if ($canManageTags) : ?>
+                <form action="<?= route('order_tags.destroy', ['id' => $order->id, 'tag_id' => $tag->id]) ?>" method="POST" onsubmit="return confirm('Remover esta etiqueta do pedido?')">
+                    <input type="hidden" name="_method" value="DELETE">
+                    <button class="btn btn-sm btn-link p-0 text-reset" type="submit" title="Remover etiqueta" aria-label="Remover etiqueta">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </form>
+                <?php endif; ?>
+            </span>
+            <?php endforeach; ?>
+        </div>
+    <?php endif; ?>
+
+    <?php if ($canManageTags) : ?>
+        <?php if (empty($availableTags)) : ?>
+        <p class="text-muted mb-0">Todas as etiquetas disponiveis ja estao vinculadas.</p>
+        <?php else : ?>
+        <form class="d-flex flex-wrap gap-2 align-items-end" action="<?= route('order_tags.create', ['id' => $order->id]) ?>" method="POST">
+            <div>
+                <label class="form-label" for="tag-select">Vincular etiqueta</label>
+                <select id="tag-select" class="form-select" name="tag_id" required>
+                    <?php foreach ($availableTags as $tag) : ?>
+                    <option value="<?= $tag->id ?>"><?= htmlspecialchars($tag->name) ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <button class="btn btn-success" type="submit">
+                <i class="bi bi-plus-lg"></i> Adicionar
+            </button>
+        </form>
+        <?php endif; ?>
+    <?php endif; ?>
 </section>
 
 <section class="action-bar">

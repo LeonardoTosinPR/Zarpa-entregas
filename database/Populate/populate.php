@@ -11,6 +11,12 @@ $pdo = Database::getDatabaseConn();
 $senha = password_hash('password123', PASSWORD_DEFAULT);
 $adminSenha = password_hash('admin123', PASSWORD_DEFAULT);
 
+if ($pdo->query("SHOW TABLES LIKE 'order_tags'")->fetchColumn()) {
+    $pdo->exec("DELETE FROM order_tags");
+}
+if ($pdo->query("SHOW TABLES LIKE 'tags'")->fetchColumn()) {
+    $pdo->exec("DELETE FROM tags");
+}
 if ($pdo->query("SHOW TABLES LIKE 'orders'")->fetchColumn()) {
     $pdo->exec("DELETE FROM orders");
 }
@@ -35,6 +41,26 @@ $pdo->exec("INSERT INTO orders (client_id, courier_id, pickup_address, delivery_
     ($joaoId, null, 'Rua das Palmeiras, 120 - Centro', 'Avenida Brasil, 900 - Vila Nova', 'pequeno', 0, 12.00, 'pendente', 'pix', 11.20, 'ZP1001'),
     ($joaoId, $leonardoId, 'Mercado Municipal - Box 14', 'Rua Sete de Setembro, 45 - Centro', 'medio', 1, 8.00, 'aceito', 'cartao', 20.80, 'ZP1002'),
     ($adminId, $williamId, 'Rua Projetada, 30 - Jardim Sul', 'Condominio Primavera, Bloco B', 'grande', 0, 15.00, 'em rota', 'dinheiro', 21.50, 'ZP1003')
+");
+
+$pdo->exec("INSERT INTO tags (name, color) VALUES
+    ('Urgente', 'danger'),
+    ('Fragil', 'warning'),
+    ('Refrigerado', 'info'),
+    ('Volumoso', 'dark')
+");
+
+$urgenteId = $pdo->query("SELECT id FROM tags WHERE name = 'Urgente'")->fetchColumn();
+$fragilId = $pdo->query("SELECT id FROM tags WHERE name = 'Fragil'")->fetchColumn();
+$refrigeradoId = $pdo->query("SELECT id FROM tags WHERE name = 'Refrigerado'")->fetchColumn();
+
+$orderIds = $pdo->query("SELECT id FROM orders ORDER BY id")->fetchAll(PDO::FETCH_COLUMN);
+
+$pdo->exec("INSERT INTO order_tags (order_id, tag_id) VALUES
+    ({$orderIds[0]}, $urgenteId),
+    ({$orderIds[1]}, $fragilId),
+    ({$orderIds[1]}, $refrigeradoId),
+    ({$orderIds[2]}, $urgenteId)
 ");
 
 echo "Banco populado!\n";

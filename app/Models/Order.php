@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Core\Database\ActiveRecord\BelongsToMany;
 use Core\Database\ActiveRecord\Model;
 use Core\Database\Database;
 use Lib\Validations;
@@ -181,6 +182,19 @@ class Order extends Model
         return $this->courier_id ? User::findById((int) $this->courier_id) : null;
     }
 
+    public function tags(): BelongsToMany
+    {
+        return $this->belongsToMany(Tag::class, 'order_tags', 'order_id', 'tag_id');
+    }
+
+    /**
+     * @return array<int>
+     */
+    public function tagIds(): array
+    {
+        return array_map(fn(Tag $tag) => (int) $tag->id, $this->tags()->get());
+    }
+
     public function statusLabelText(): string
     {
         return self::statusLabel($this->status);
@@ -259,6 +273,12 @@ class Order extends Model
         return $user->isDeliverer()
             && (int) $this->courier_id === (int) $user->id
             && in_array($this->status, [self::STATUS_ACCEPTED, self::STATUS_ON_ROUTE], true);
+    }
+
+    public function canManageTagsBy(User $user): bool
+    {
+        return $user->isAdmin()
+            || (int) $this->client_id === (int) $user->id;
     }
 
     /**

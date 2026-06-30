@@ -4,6 +4,7 @@ use App\Controllers\AuthenticationsController;
 use App\Controllers\AdminController;
 use App\Controllers\HomeController;
 use App\Controllers\OrdersController;
+use App\Controllers\TagsController;
 use Core\Router\Route;
 
 Route::get('/login', [AuthenticationsController::class, 'new'])->name('users.login');
@@ -26,6 +27,12 @@ Route::middleware('auth')->group(function () {
     Route::delete('/orders/{id}', [OrdersController::class, 'destroy'])->name('orders.destroy');
     Route::post('/orders/{id}/accept', [OrdersController::class, 'accept'])->name('orders.accept');
     Route::post('/orders/{id}/refuse', [OrdersController::class, 'refuse'])->name('orders.refuse');
+    Route::post('/orders/{id}/tags', [OrdersController::class, 'attachTag'])->name('order_tags.create');
+    Route::delete('/orders/{id}/tags/{tag_id}', [OrdersController::class, 'detachTag'])->name('order_tags.destroy');
+
+    Route::get('/tags', [TagsController::class, 'index'])->name('tags.index');
+    Route::post('/tags', [TagsController::class, 'create'])->name('tags.create');
+    Route::delete('/tags/{id}', [TagsController::class, 'destroy'])->name('tags.destroy');
 });
 
 Route::middleware('admin')->group(function () {
