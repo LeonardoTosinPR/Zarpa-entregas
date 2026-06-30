@@ -1,6 +1,7 @@
 SET foreign_key_checks = 0;
 
-DROP TABLE IF EXISTS order_delivery_photos;
+DROP TABLE IF EXISTS order_tags;
+DROP TABLE IF EXISTS tags;
 DROP TABLE IF EXISTS orders;
 DROP TABLE IF EXISTS notifications;
 DROP TABLE IF EXISTS users;
@@ -54,6 +55,22 @@ CREATE TABLE notifications (
     message VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_notifications_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE tags (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(40) NOT NULL,
+    color ENUM('secondary', 'primary', 'success', 'danger', 'warning', 'info', 'dark') NOT NULL DEFAULT 'secondary',
+    UNIQUE KEY uq_tags_name (name)
+) ENGINE=InnoDB;
+
+CREATE TABLE order_tags (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    order_id INT NOT NULL,
+    tag_id INT NOT NULL,
+    UNIQUE KEY uq_order_tags (order_id, tag_id),
+    CONSTRAINT fk_order_tags_order FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
+    CONSTRAINT fk_order_tags_tag FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
 SET foreign_key_checks = 1;

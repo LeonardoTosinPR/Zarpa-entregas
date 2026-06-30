@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Models\Notification;
 use App\Models\Order;
+use App\Models\Tag;
 use App\Models\User;
 use App\Services\DeliveryProofUploader;
 use Core\Http\Controllers\Controller;
@@ -247,6 +248,50 @@ class OrdersController extends Controller
         }
 
         $this->redirectTo(route('orders.index'));
+    }
+
+    public function attachTag(Request $request): void
+    {
+        $order = $this->findVisibleOrder($request);
+        $user = $this->currentUser();
+
+        if (!$order->canManageTagsBy($user)) {
+            FlashMessage::danger('Voce nao pode gerenciar as etiquetas deste pedido.');
+            $this->redirectTo(route('orders.show', ['id' => $order->id]));
+        }
+
+        $tag = Tag::findById((int) $request->getParam('tag_id'));
+
+        if ($tag === null) {
+            FlashMessage::danger('Etiqueta nao encontrada.');
+            $this->redirectTo(route('orders.show', ['id' => $order->id]));
+        }
+
+        if ($order->tags()->exists((int) $tag->id)) {
+            FlashMessage::danger('Esta etiqueta ja esta vinculada ao pedido.');
+            $this->redirectTo(route('orders.show', ['id' => $order->id]));
+        }
+
+        $order->tags()->attach((int) $tag->id);
+
+        FlashMessage::success('Etiqueta vinculada ao pedido.');
+        $this->redirectTo(route('orders.show', ['id' => $order->id]));
+    }
+
+    public function detachTag(Request $request): void
+    {
+        $order = $this->findVisibleOrder($request);
+        $user = $this->currentUser();
+
+        if (!$order->canManageTagsBy($user)) {
+            FlashMessage::danger('Voce nao pode gerenciar as etiquetas deste pedido.');
+            $this->redirectTo(route('orders.show', ['id' => $order->id]));
+        }
+
+        $order->tags()->detach((int) $request->getParam('tag_id'));
+
+        FlashMessage::success('Etiqueta removida do pedido.');
+        $this->redirectTo(route('orders.show', ['id' => $order->id]));
     }
 
     private function findVisibleOrder(Request $request): Order

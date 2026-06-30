@@ -1,0 +1,99 @@
+<?php
+use App\Models\Tag;
+
+$user = $this->current_user;
+?>
+
+<section class="delivery-hero mb-3">
+    <div class="delivery-hero-content">
+        <span class="status-chip mb-3">
+            <i class="bi bi-tags"></i> Etiquetas
+        </span>
+        <h1 class="fw-bold mb-2">Gerenciar etiquetas</h1>
+        <p class="mb-0">Etiquetas classificam os pedidos em uma relacao N:N. Cada pedido pode ter varias etiquetas e cada etiqueta pode estar em varios pedidos.</p>
+    </div>
+    <img class="delivery-hero-mobilete" src="/assets/images/mobilete.svg" alt="Mobilete em entrega">
+</section>
+
+<?php if ($user->isAdmin()) : ?>
+<section class="admin-panel mb-3">
+    <div class="section-toolbar mb-3">
+        <div>
+            <div class="profile-label">Nova etiqueta</div>
+            <h2 class="h5 mb-0">Cadastrar</h2>
+        </div>
+    </div>
+    <form class="row g-2 align-items-end" action="<?= route('tags.create') ?>" method="POST">
+        <div class="col-12 col-md-6">
+            <label class="form-label" for="tag-name">Nome</label>
+            <input id="tag-name" class="form-control" type="text" name="tag[name]" placeholder="Ex: Urgente" required>
+        </div>
+        <div class="col-12 col-md-4">
+            <label class="form-label" for="tag-color">Cor</label>
+            <select id="tag-color" class="form-select" name="tag[color]">
+                <?php foreach (Tag::colors() as $color) : ?>
+                <option value="<?= $color ?>"><?= ucfirst($color) ?></option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+        <div class="col-12 col-md-2">
+            <button class="btn btn-success w-100" type="submit">
+                <i class="bi bi-plus-lg"></i> Criar
+            </button>
+        </div>
+    </form>
+</section>
+<?php endif; ?>
+
+<section class="admin-panel">
+    <div class="section-toolbar mb-3">
+        <div>
+            <div class="profile-label">Catalogo</div>
+            <h2 class="h5 mb-0">Etiquetas cadastradas</h2>
+        </div>
+        <span class="badge text-bg-light"><?= count($tags) ?> etiqueta<?= count($tags) === 1 ? '' : 's' ?></span>
+    </div>
+
+    <?php if (empty($tags)) : ?>
+        <div class="empty-state">
+            <i class="bi bi-tags fs-3 text-muted"></i>
+            <p class="mb-0 text-muted">Nenhuma etiqueta cadastrada.</p>
+        </div>
+    <?php else : ?>
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Etiqueta</th>
+                        <th>Pedidos vinculados</th>
+                        <?php if ($user->isAdmin()) : ?>
+                        <th class="text-end">Acoes</th>
+                        <?php endif; ?>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($tags as $tag) : ?>
+                    <tr>
+                        <td>
+                            <span class="badge <?= $tag->badgeClass() ?>">
+                                <i class="bi bi-tag"></i> <?= htmlspecialchars($tag->name) ?>
+                            </span>
+                        </td>
+                        <td><?= $tag->orders()->count() ?></td>
+                        <?php if ($user->isAdmin()) : ?>
+                        <td class="text-end">
+                            <form action="<?= route('tags.destroy', ['id' => $tag->id]) ?>" method="POST" onsubmit="return confirm('Remover esta etiqueta e todos os seus vinculos?')">
+                                <input type="hidden" name="_method" value="DELETE">
+                                <button class="btn btn-sm btn-outline-danger" type="submit" title="Remover etiqueta" aria-label="Remover etiqueta">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </td>
+                        <?php endif; ?>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+    <?php endif; ?>
+</section>
