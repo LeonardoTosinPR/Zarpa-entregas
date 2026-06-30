@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Core\Database\ActiveRecord\BelongsToMany;
+use Core\Database\ActiveRecord\HasMany;
 use Core\Database\ActiveRecord\Model;
 use Core\Database\Database;
 use Lib\Validations;
@@ -187,6 +188,11 @@ class Order extends Model
         return $this->belongsToMany(Tag::class, 'order_tags', 'order_id', 'tag_id');
     }
 
+    public function deliveryPhotos(): HasMany
+    {
+        return $this->hasMany(OrderDeliveryPhoto::class, 'order_id');
+    }
+
     /**
      * @return array<int>
      */
@@ -279,6 +285,19 @@ class Order extends Model
     {
         return $user->isAdmin()
             || (int) $this->client_id === (int) $user->id;
+    }
+
+    public function canReceiveDeliveryPhotosFrom(User $user): bool
+    {
+        return $user->isDeliverer()
+            && (int) $this->courier_id === (int) $user->id
+            && $this->status === self::STATUS_ON_ROUTE;
+    }
+
+    public function canManageDeliveryPhotosBy(User $user): bool
+    {
+        return $user->isAdmin()
+            || ($user->isDeliverer() && (int) $this->courier_id === (int) $user->id);
     }
 
     /**
