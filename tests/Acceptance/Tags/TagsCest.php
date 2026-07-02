@@ -45,7 +45,7 @@ class TagsCest extends BaseAcceptanceCest
         $page->login($admin->email, '123456');
 
         $page->amOnPage('/tags');
-        $page->fillField('tag[name]', 'Prioritario');
+        $page->fillField('#tag-name', 'Prioritario');
         $page->click('Criar');
 
         $page->see('Etiqueta criada com sucesso.');

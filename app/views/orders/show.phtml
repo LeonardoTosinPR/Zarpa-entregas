@@ -113,12 +113,13 @@ $availableTags = array_filter(Tag::orderedByName(), fn($tag) => !in_array((int) 
         <?php else : ?>
         <form class="d-flex flex-wrap gap-2 align-items-end" action="<?= route('order_tags.create', ['id' => $order->id]) ?>" method="POST">
             <div>
-                <label class="form-label" for="tag-select">Vincular etiqueta</label>
-                <select id="tag-select" class="form-select" name="tag_id" required>
+                <label class="form-label" for="tag-select">Vincular etiqueta(s)</label>
+                <select id="tag-select" class="form-select" name="tag_id[]" multiple required size="5">
                     <?php foreach ($availableTags as $tag) : ?>
                     <option value="<?= $tag->id ?>"><?= htmlspecialchars($tag->name) ?></option>
                     <?php endforeach; ?>
                 </select>
+                <small class="form-text text-muted">Use Ctrl+clique (Cmd+clique no Mac) para selecionar múltiplas</small>
             </div>
             <button class="btn btn-success" type="submit">
                 <i class="bi bi-plus-lg"></i> Adicionar

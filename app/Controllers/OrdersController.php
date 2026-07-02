@@ -260,21 +260,46 @@ class OrdersController extends Controller
             $this->redirectTo(route('orders.show', ['id' => $order->id]));
         }
 
-        $tag = Tag::findById((int) $request->getParam('tag_id'));
+        $raw = $request->getParam('tag_id');
+        $ids = is_array($raw) ? $raw : [$raw];
 
-        if ($tag === null) {
-            FlashMessage::danger('Etiqueta nao encontrada.');
-            $this->redirectTo(route('orders.show', ['id' => $order->id]));
+        $attached = [];
+        $skipped = [];
+        $notFound = [];
+
+        foreach ($ids as $rawId) {
+            $id = (int) $rawId;
+            if ($id <= 0) {
+                continue;
+            }
+
+            $tag = Tag::findById($id);
+            if ($tag === null) {
+                $notFound[] = $id;
+                continue;
+            }
+
+            if ($order->tags()->exists((int) $tag->id)) {
+                $skipped[] = $id;
+                continue;
+            }
+
+            $order->tags()->attach((int) $tag->id);
+            $attached[] = $id;
         }
 
-        if ($order->tags()->exists((int) $tag->id)) {
-            FlashMessage::danger('Esta etiqueta ja esta vinculada ao pedido.');
-            $this->redirectTo(route('orders.show', ['id' => $order->id]));
+        if (!empty($attached)) {
+            FlashMessage::success(count($attached) === 1 ? 'Etiqueta vinculada ao pedido.' : count($attached) . ' etiquetas vinculadas ao pedido.');
         }
 
-        $order->tags()->attach((int) $tag->id);
+        if (!empty($skipped)) {
+            FlashMessage::danger(count($skipped) === 1 ? 'Uma etiqueta ja estava vinculada ao pedido.' : count($skipped) . ' etiquetas ja estavam vinculadas ao pedido.');
+        }
 
-        FlashMessage::success('Etiqueta vinculada ao pedido.');
+        if (!empty($notFound)) {
+            FlashMessage::danger(count($notFound) === 1 ? 'Etiqueta nao encontrada.' : count($notFound) . ' etiquetas nao encontradas.');
+        }
+
         $this->redirectTo(route('orders.show', ['id' => $order->id]));
     }
 

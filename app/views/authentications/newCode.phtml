@@ -1,0 +1,18 @@
+<h2 class="h5 text-center mb-3">Entrar por codigo</h2>
+
+<form action="<?= route('users.ValidateCode') ?>" method="POST" data-validate-form novalidate>
+    <div class="mb-3">
+        <label class="form-label">Codigo</label>
+        <input type="text" name="user[identifier]" class="form-control" placeholder="1000, 1111, 9999, 2222" required autofocus>
+    </div>
+
+    <div class="d-grid mb-3">
+        <button type="submit" class="btn btn-zarpa fw-bold">
+            <i class="bi bi-box-arrow-in-right me-1"></i> Entrar
+        </button>
+    </div>
+
+    <p class="text-center text-muted small mb-0">
+        Nao tem conta? <a href="<?= route('users.register') ?>">Cadastre-se</a>
+    </p>
+</form>

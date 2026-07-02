@@ -44,7 +44,7 @@ class OrderTagsCest extends BaseAcceptanceCest
         return $tag;
     }
 
-    // 1.1 - Registro da relação
+    // 1.1 - Registro da relação (single tag)
     public function attachesTagToOrderSuccessfully(AcceptanceTester $page): void
     {
         $client = $this->makeClient();
@@ -53,11 +53,30 @@ class OrderTagsCest extends BaseAcceptanceCest
         $page->login($client->email, '123456');
 
         $page->amOnPage('/orders/' . $order->id);
-        $page->selectOption('tag_id', 'Urgente');
+        $page->selectOption('#tag-select', 'Urgente');
         $page->click('Adicionar');
 
         $page->see('Etiqueta vinculada ao pedido.');
         $page->see('Urgente');
+    }
+
+    // 1.1b - Registro de múltiplas relações
+    public function attachesMultipleTagsToOrderSuccessfully(AcceptanceTester $page): void
+    {
+        $client = $this->makeClient();
+        $order = $this->makeOrder($client);
+        $this->makeTag('Urgente');
+        $this->makeTag('Frágil');
+        $this->makeTag('Refrigerado');
+        $page->login($client->email, '123456');
+
+        $page->amOnPage('/orders/' . $order->id);
+        $page->selectOption('#tag-select', ['Urgente', 'Frágil']);
+        $page->click('Adicionar');
+
+        $page->see('2 etiquetas vinculadas ao pedido.');
+        $page->see('Urgente');
+        $page->see('Frágil');
     }
 
     // 1.2 - Visualização da relação
