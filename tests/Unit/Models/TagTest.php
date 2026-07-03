@@ -124,6 +124,20 @@ class TagTest extends TestCase
         $this->assertTrue($order->tags()->exists((int) $tag->id));
     }
 
+    public function testAttachToOrderAttachesMultipleTagsAndSkipsExistingOnes(): void
+    {
+        $order = $this->makeOrder($this->makeClient());
+        $tagA = $this->makeTag(['name' => 'Urgente']);
+        $tagB = $this->makeTag(['name' => 'Fragil']);
+
+        $result = Tag::attachToOrder($order, [(int) $tagA->id, (int) $tagB->id, (int) $tagA->id, 999999]);
+
+        $this->assertSame([ (int) $tagA->id, (int) $tagB->id ], $result['attached']);
+        $this->assertSame([ (int) $tagA->id ], $result['skipped']);
+        $this->assertSame([999999], $result['notFound']);
+        $this->assertSame(2, $order->tags()->count());
+    }
+
     public function testDetachRemovesRelation(): void
     {
         $order = $this->makeOrder($this->makeClient());

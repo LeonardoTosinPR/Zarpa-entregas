@@ -12,6 +12,7 @@ abstract class TestCase extends BaseTestCase
     {
         parent::setUp();
         EnvLoader::init();
+        Database::drop();
         Database::create();
         Database::migrate();
     }

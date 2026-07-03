@@ -57,6 +57,45 @@ class Tag extends Model
         return $this->belongsToMany(Order::class, 'order_tags', 'tag_id', 'order_id');
     }
 
+    /**
+     * @param Order $order
+     * @param array<int|string> $ids
+     * @return array{attached: int[], skipped: int[], notFound: int[]}
+     */
+    public static function attachToOrder(Order $order, array $ids): array
+    {
+        $attached = [];
+        $skipped = [];
+        $notFound = [];
+
+        foreach ($ids as $rawId) {
+            $id = (int) $rawId;
+            if ($id <= 0) {
+                continue;
+            }
+
+            $tag = self::findById($id);
+            if ($tag === null) {
+                $notFound[] = $id;
+                continue;
+            }
+
+            if ($order->tags()->exists($id)) {
+                $skipped[] = $id;
+                continue;
+            }
+
+            $order->tags()->attach($id);
+            $attached[] = $id;
+        }
+
+        return [
+            'attached' => $attached,
+            'skipped' => $skipped,
+            'notFound' => $notFound,
+        ];
+    }
+
     public function badgeClass(): string
     {
         return 'text-bg-' . $this->color;

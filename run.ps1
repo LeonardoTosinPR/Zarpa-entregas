@@ -370,33 +370,38 @@ try {
 
         # ====== TESTES ======
         'test' {
-            $testPath = if ($CommandArgs.Count -gt 0) { $CommandArgs } else { @('tests') }
+            $testPath = @($CommandArgs)
+            if ($testPath.Count -eq 0) { $testPath = @('tests') }
             Write-Info "Executando PHPUnit..."
-            Invoke-DockerCompose run --rm php_test ./vendor/bin/phpunit --color=always --testdox @testPath
+            Invoke-DockerCompose run --rm php_test ./vendor/bin/phpunit --color=always --testdox @($testPath)
         }
 
         'codecept' {
+            $commandArgs = @($CommandArgs)
             Write-Info "Executando Codeception..."
-            Invoke-DockerCompose run --rm php_test ./vendor/bin/codecept @CommandArgs
+            Invoke-DockerCompose run --rm php_test ./vendor/bin/codecept @($commandArgs)
         }
 
         'test:browser' {
-            $testPath = if ($CommandArgs.Count -gt 0) { $CommandArgs } else { @('tests/Acceptance') }
+            $testPath = @($CommandArgs)
+            if ($testPath.Count -eq 0) { $testPath = @('tests/Acceptance') }
             Write-Info "Testes com navegador..."
-            Invoke-DockerCompose run --rm php_test ./vendor/bin/codecept run acceptance @testPath
+            Invoke-DockerCompose run --rm php_test ./vendor/bin/codecept run acceptance @($testPath)
         }
 
         # ====== CODE QUALITY ======
         'phpcs' {
-            $testPath = if ($CommandArgs.Count -gt 0) { $CommandArgs } else { @('.') }
+            $testPath = @($CommandArgs)
+            if ($testPath.Count -eq 0) { $testPath = @('.') }
             Write-Info "Verificando estilo..."
-            Invoke-DockerCompose run --rm php ./vendor/bin/phpcs @testPath
+            Invoke-DockerCompose run --rm php ./vendor/bin/phpcs @($testPath)
         }
 
         'phpcbf' {
-            $testPath = if ($CommandArgs.Count -gt 0) { $CommandArgs } else { @('.') }
+            $testPath = @($CommandArgs)
+            if ($testPath.Count -eq 0) { $testPath = @('.') }
             Write-Warning "Corrigindo estilo..."
-            Invoke-DockerCompose run --rm php ./vendor/bin/phpcbf @testPath
+            Invoke-DockerCompose run --rm php ./vendor/bin/phpcbf @($testPath)
         }
 
         'phpstan' {

@@ -262,42 +262,18 @@ class OrdersController extends Controller
 
         $raw = $request->getParam('tag_id');
         $ids = is_array($raw) ? $raw : [$raw];
+        $result = Tag::attachToOrder($order, $ids);
 
-        $attached = [];
-        $skipped = [];
-        $notFound = [];
-
-        foreach ($ids as $rawId) {
-            $id = (int) $rawId;
-            if ($id <= 0) {
-                continue;
-            }
-
-            $tag = Tag::findById($id);
-            if ($tag === null) {
-                $notFound[] = $id;
-                continue;
-            }
-
-            if ($order->tags()->exists((int) $tag->id)) {
-                $skipped[] = $id;
-                continue;
-            }
-
-            $order->tags()->attach((int) $tag->id);
-            $attached[] = $id;
+        if (!empty($result['attached'])) {
+            FlashMessage::success(count($result['attached']) === 1 ? 'Etiqueta vinculada ao pedido.' : count($result['attached']) . ' etiquetas vinculadas ao pedido.');
         }
 
-        if (!empty($attached)) {
-            FlashMessage::success(count($attached) === 1 ? 'Etiqueta vinculada ao pedido.' : count($attached) . ' etiquetas vinculadas ao pedido.');
+        if (!empty($result['skipped'])) {
+            FlashMessage::danger(count($result['skipped']) === 1 ? 'Uma etiqueta ja estava vinculada ao pedido.' : count($result['skipped']) . ' etiquetas ja estavam vinculadas ao pedido.');
         }
 
-        if (!empty($skipped)) {
-            FlashMessage::danger(count($skipped) === 1 ? 'Uma etiqueta ja estava vinculada ao pedido.' : count($skipped) . ' etiquetas ja estavam vinculadas ao pedido.');
-        }
-
-        if (!empty($notFound)) {
-            FlashMessage::danger(count($notFound) === 1 ? 'Etiqueta nao encontrada.' : count($notFound) . ' etiquetas nao encontradas.');
+        if (!empty($result['notFound'])) {
+            FlashMessage::danger(count($result['notFound']) === 1 ? 'Etiqueta nao encontrada.' : count($result['notFound']) . ' etiquetas nao encontradas.');
         }
 
         $this->redirectTo(route('orders.show', ['id' => $order->id]));
@@ -319,7 +295,7 @@ class OrdersController extends Controller
         $this->redirectTo(route('orders.show', ['id' => $order->id]));
     }
 
-    private function findVisibleOrder(Request $request): Order
+    protected function findVisibleOrder(Request $request): Order
     {
         $order = Order::findById((int) $request->getParam('id'));
         $user = $this->currentUser();
