@@ -2,6 +2,7 @@ SET foreign_key_checks = 0;
 
 DROP TABLE IF EXISTS order_tags;
 DROP TABLE IF EXISTS tags;
+DROP TABLE IF EXISTS order_delivery_photos;
 DROP TABLE IF EXISTS orders;
 DROP TABLE IF EXISTS notifications;
 DROP TABLE IF EXISTS users;
