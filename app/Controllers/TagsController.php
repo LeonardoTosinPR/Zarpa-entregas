@@ -61,4 +61,115 @@ class TagsController extends Controller
 
         $this->redirectTo(route('tags.index'));
     }
+
+    /**
+     * Retorna todas as tags em formato JSON para requisições Ajax
+     */
+    public function listAjax(): void
+    {
+        $tags = Tag::orderedByName();
+        $json = [
+            'success' => true,
+            'message' => 'Etiquetas carregadas com sucesso.',
+            'data' => array_map(function (Tag $tag) {
+                return [
+                    'id' => $tag->id,
+                    'name' => htmlspecialchars($tag->name),
+                    'color' => $tag->color,
+                    'badgeClass' => $tag->badgeClass()
+                ];
+            }, $tags)
+        ];
+
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode($json);
+    }
+
+    /**
+     * Cria uma tag via requisição Ajax
+     */
+    public function createAjax(Request $request): void
+    {
+        if (!$this->currentUser()->isAdmin()) {
+            http_response_code(403);
+            $json = [
+                'success' => false,
+                'message' => 'Apenas administradores podem gerenciar etiquetas.'
+            ];
+            header('Content-Type: application/json; charset=utf-8');
+            echo json_encode($json);
+            return;
+        }
+
+        $params = $request->getParam('tag', []);
+        $tag = new Tag([
+            'name' => trim($params['name'] ?? ''),
+            'color' => $params['color'] ?? Tag::COLOR_SECONDARY
+        ]);
+
+        if ($tag->save()) {
+            http_response_code(201);
+            $json = [
+                'success' => true,
+                'message' => 'Etiqueta criada com sucesso.',
+                'data' => [
+                    'id' => $tag->id,
+                    'name' => htmlspecialchars($tag->name),
+                    'color' => $tag->color,
+                    'badgeClass' => $tag->badgeClass()
+                ]
+            ];
+        } else {
+            http_response_code(400);
+            $json = [
+                'success' => false,
+                'message' => 'Verifique os dados da etiqueta.'
+            ];
+        }
+
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode($json);
+    }
+
+    /**
+     * Remove uma tag via requisição Ajax
+     */
+    public function destroyAjax(Request $request): void
+    {
+        if (!$this->currentUser()->isAdmin()) {
+            http_response_code(403);
+            $json = [
+                'success' => false,
+                'message' => 'Apenas administradores podem gerenciar etiquetas.'
+            ];
+            header('Content-Type: application/json; charset=utf-8');
+            echo json_encode($json);
+            return;
+        }
+
+        $tag = Tag::findById((int) $request->getParam('id'));
+
+        if ($tag === null) {
+            http_response_code(404);
+            $json = [
+                'success' => false,
+                'message' => 'Etiqueta nao encontrada.'
+            ];
+        } elseif ($tag->destroy()) {
+            http_response_code(200);
+            $json = [
+                'success' => true,
+                'message' => 'Etiqueta removida. Os vinculos com os pedidos tambem foram apagados.'
+            ];
+        } else {
+            http_response_code(500);
+            $json = [
+                'success' => false,
+                'message' => 'Nao foi possivel remover a etiqueta.'
+            ];
+        }
+
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode($json);
+    }
 }

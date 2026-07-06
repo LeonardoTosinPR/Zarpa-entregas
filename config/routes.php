@@ -33,6 +33,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/tags', [TagsController::class, 'index'])->name('tags.index');
     Route::post('/tags', [TagsController::class, 'create'])->name('tags.create');
     Route::delete('/tags/{id}', [TagsController::class, 'destroy'])->name('tags.destroy');
+
+    // Rotas Ajax para Tags
+    Route::get('/api/tags', [TagsController::class, 'listAjax'])->name('api.tags.list');
+    Route::post('/api/tags', [TagsController::class, 'createAjax'])->name('api.tags.create');
+    Route::delete('/api/tags/{id}', [TagsController::class, 'destroyAjax'])->name('api.tags.destroy');
 });
 
 Route::middleware('admin')->group(function () {
