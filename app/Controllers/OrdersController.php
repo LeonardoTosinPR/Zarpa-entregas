@@ -260,21 +260,22 @@ class OrdersController extends Controller
             $this->redirectTo(route('orders.show', ['id' => $order->id]));
         }
 
-        $tag = Tag::findById((int) $request->getParam('tag_id'));
+        $raw = $request->getParam('tag_id');
+        $ids = is_array($raw) ? $raw : [$raw];
+        $result = Tag::attachToOrder($order, $ids);
 
-        if ($tag === null) {
-            FlashMessage::danger('Etiqueta nao encontrada.');
-            $this->redirectTo(route('orders.show', ['id' => $order->id]));
+        if (!empty($result['attached'])) {
+            FlashMessage::success(count($result['attached']) === 1 ? 'Etiqueta vinculada ao pedido.' : count($result['attached']) . ' etiquetas vinculadas ao pedido.');
         }
 
-        if ($order->tags()->exists((int) $tag->id)) {
-            FlashMessage::danger('Esta etiqueta ja esta vinculada ao pedido.');
-            $this->redirectTo(route('orders.show', ['id' => $order->id]));
+        if (!empty($result['skipped'])) {
+            FlashMessage::danger(count($result['skipped']) === 1 ? 'Uma etiqueta ja estava vinculada ao pedido.' : count($result['skipped']) . ' etiquetas ja estavam vinculadas ao pedido.');
         }
 
-        $order->tags()->attach((int) $tag->id);
+        if (!empty($result['notFound'])) {
+            FlashMessage::danger(count($result['notFound']) === 1 ? 'Etiqueta nao encontrada.' : count($result['notFound']) . ' etiquetas nao encontradas.');
+        }
 
-        FlashMessage::success('Etiqueta vinculada ao pedido.');
         $this->redirectTo(route('orders.show', ['id' => $order->id]));
     }
 
@@ -294,7 +295,7 @@ class OrdersController extends Controller
         $this->redirectTo(route('orders.show', ['id' => $order->id]));
     }
 
-    private function findVisibleOrder(Request $request): Order
+    protected function findVisibleOrder(Request $request): Order
     {
         $order = Order::findById((int) $request->getParam('id'));
         $user = $this->currentUser();
